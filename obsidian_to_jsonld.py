@@ -61,8 +61,10 @@ def process_text_links(text):
         target_uuid = concept_index.get(target_clean)
         
         if target_uuid:
-            # Class: internal-link | Target: (default/self)
-            return f'<a href="{target_uuid}.html" class="internal-link">{label_text}</a>'
+            # OLD: return f'<a href="{target_uuid}.html" ...            
+            # NEW: Absolute path to the directory (matches the JSON-LD ID)
+            # Note: We ensure there is NO .html extension.
+            return f'<a href="/{VERSION}/{target_uuid}" class="internal-link">{label_text}</a>'            
         else:
             return label_text
 
@@ -404,12 +406,20 @@ def pass_two_build_site():
         # 1. Use the custom Smart Formatter
         final_html = prettify_html(raw_html)
         
-        # 2. Write to file
-        filename = f"{uuid}.html"
-        target_file = OUTPUT_DIR / filename
+        # 2. Write to file       
+        # OLD:
+        # filename = f"{uuid}.html"
+        # target_file = OUTPUT_DIR / filename
+
+        # NEW: Directory Index Pattern
+        # Creates: vernacular-cloud-003/0.0.1/{uuid}/index.html
+        concept_dir = OUTPUT_DIR / uuid
+        concept_dir.mkdir(parents=True, exist_ok=True)
+        
+        target_file = concept_dir / "index.html"
         
         with open(target_file, "w", encoding="utf-8") as f:
-            f.write(final_html)
+            f.write(final_html)        
             
     print(f"Build Complete. Files written to {OUTPUT_DIR}")
     
