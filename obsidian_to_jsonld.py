@@ -41,6 +41,46 @@ def clean_link_text(text):
     match = re.search(r'\[\[(.*?)\]\]', text)
     return match.group(1) if match else text.strip()
 
+# --- HELPER: Centralized Link Processing ---
+def process_text_links(text):
+    """
+    1. Replaces [[Target]] with <a class="internal-link"> (Same Tab)
+    2. Replaces [Label](URL) with <a class="external-link" target="_blank"> (New Tab)
+    """
+    
+    # --- 1. Internal Wiki Links (Same Tab) ---
+    def wiki_link_sub(match):
+        inner = match.group(1)
+        if '|' in inner:
+            target_text, label_text = inner.split('|', 1)
+        else:
+            target_text = inner
+            label_text = inner
+            
+        target_clean = target_text.strip().lower()
+        target_uuid = concept_index.get(target_clean)
+        
+        if target_uuid:
+            # Class: internal-link | Target: (default/self)
+            return f'<a href="{target_uuid}.html" class="internal-link">{label_text}</a>'
+        else:
+            return label_text
+
+    text = re.sub(r'\[\[(.*?)\]\]', wiki_link_sub, text)
+
+    # --- 2. External Markdown Links (New Tab) ---
+    def md_link_sub(match):
+        label = match.group(1)
+        url = match.group(2)
+        # Class: external-link | Target: _blank
+        return f'<a href="{url}" class="external-link" target="_blank" rel="noopener noreferrer">{label}</a>'
+
+    # Regex excludes images starting with !
+    text = re.sub(r'(?<!\!)\[([^\]]+)\]\(([^)]+)\)', md_link_sub, text)
+
+    return text 
+
+    
 def pass_one_index_uuids():
     """Scans all files to build a map of 'Title -> UUID'."""
     print("--- Building Index ---")
@@ -109,65 +149,99 @@ def generate_skos_json(uuid, title, sections):
 
     return json_ld
 
+def render_section_to_html(lines):
+    """
+    Parses a list of lines into HTML, handling Mixed Content.
+    - Standard text -> <p>
+    - '##' -> <h3>
+    - '- ', '* ', '+ ' -> <ul><li>
+    """
+    html_parts = []
+    in_list = False
+    
+    # Regex for lines starting with -, *, or + followed by a space
+    bullet_pattern = re.compile(r'^[-*+]\s+(.*)')
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped: continue
+        
+        # 1. Check for Bullet Points
+        bullet_match = bullet_pattern.match(stripped)
+        
+        if bullet_match:
+            if not in_list:
+                html_parts.append("<ul>")
+                in_list = True
+            
+            # Extract content after the bullet
+            raw_content = bullet_match.group(1)
+            content = process_text_links(raw_content)
+            html_parts.append(f"<li>{content}</li>")
+
+        # 2. Check for Sub-Headers (##)
+        elif stripped.startswith('##'):
+            if in_list:
+                html_parts.append("</ul>")
+                in_list = False
+            
+            content = stripped.lstrip('#').strip()
+            content = process_text_links(content)
+            html_parts.append(f"<h3>{content}</h3>")
+
+        # 3. Standard Paragraphs
+        else:
+            if in_list:
+                html_parts.append("</ul>")
+                in_list = False
+            
+            content = process_text_links(stripped)
+            html_parts.append(f"<p>{content}</p>")
+            
+    # Close any open list at the end of the section
+    if in_list:
+        html_parts.append("</ul>")
+        
+    return "\n".join(html_parts)   
+   
 def render_html_main(sections):
     """HTML renderer for the <main> element."""
     html_parts = []
     
-    for header, lines in sections.items():
+    # Sections strictly for the Main area
+    main_keys = ["Definition", "Broader", "Narrower", "Related"]
+    
+    for header in main_keys:
+        lines = sections.get(header)
         if not lines: continue
-
-        if header in ["Definition","Broader", "Narrower", "Related"]:
-            html_parts.append(f"<h2>{header}</h2>")
-            
-            if lines[0].strip().startswith('-'):
-                html_parts.append("<ul>")
-                for line in lines:
-                    def link_sub(match):
-                        text = match.group(1)
-                        target_uuid = concept_index.get(text.lower())
-                        if target_uuid:
-                            # CLEAN URL: href is just the UUID
-                            return f'<a href="{target_uuid}">{text}</a>'
-                        return text
-                    
-                    content = re.sub(r'\[\[(.*?)\]\]', link_sub, line.lstrip('- '))
-                    html_parts.append(f"<li>{content}</li>")
-                html_parts.append("</ul>")
-            else:
-                html_parts.append(f"<p>{' '.join(lines)}</p>")
-                
         
-    return "\n".join(html_parts)
-
+        # 1. Add the Section Title
+        html_parts.append(f"<h2>{header}</h2>")
+        
+        # 2. CALL THE HELPER FUNCTION
+        # This handles the mix of paragraphs, headers, and bullet lists
+        section_html = render_section_to_html(lines)
+        html_parts.append(section_html)
+            
+    return "\n".join(html_parts)    
+    
 def render_html_aside(sections):
     """HTML renderer for the <aside> element."""
     html_parts = []
+    main_keys = ["Definition", "Broader", "Narrower", "Related"]
     
     for header, lines in sections.items():
         if not lines: continue
-
-        if header not in ["Definition","Broader", "Narrower", "Related"]:
-            html_parts.append(f"<h2>{header}</h2>")
-            
-            if lines[0].strip().startswith('-'):
-                html_parts.append("<ul>")
-                for line in lines:
-                    def link_sub(match):
-                        text = match.group(1)
-                        target_uuid = concept_index.get(text.lower())
-                        if target_uuid:
-                            # CLEAN URL: href is just the UUID
-                            return f'<a href="{target_uuid}">{text}</a>'
-                        return text
-                    
-                    content = re.sub(r'\[\[(.*?)\]\]', link_sub, line.lstrip('- '))
-                    html_parts.append(f"<li>{content}</li>")
-                html_parts.append("</ul>")
-            else:
-                html_parts.append(f"<p>{' '.join(lines)}</p>")               
+        if header in main_keys: continue # Skip main stuff
+        
+        html_parts.append(f"<h2>{header}</h2>")
+        
+        # CALL THE HELPER FUNCTION
+        section_html = render_section_to_html(lines)
+        html_parts.append(section_html)
         
     return "\n".join(html_parts)
-
+    
 def double_indent(html):
     # Replace leading spaces on each line
     return re.sub(
