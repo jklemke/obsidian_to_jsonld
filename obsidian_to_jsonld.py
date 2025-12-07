@@ -424,5 +424,11 @@ def pass_two_build_site():
     print(f"Build Complete. Files written to {OUTPUT_DIR}")
     
 if __name__ == "__main__":
+    # 1. Build the site
     pass_one_index_uuids()
     pass_two_build_site()
+    
+    # 2. Serve if requested
+    if args.serve:
+        serve(port=args.port)
+
