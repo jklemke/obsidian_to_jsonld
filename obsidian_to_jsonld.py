@@ -6,8 +6,6 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from bs4 import BeautifulSoup
 
-# test github
-
 # --- CONFIGURATION ---
 BASE_DIR = Path(__file__).resolve().parent
 
