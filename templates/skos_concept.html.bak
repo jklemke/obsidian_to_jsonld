@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="ROBOTS" content="ALL">
+    <meta name="Copyright" content="Grox">
+    <meta name="description" content="vernacular cloud taxonomy with json-ld"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <title>{{ title }} - Vernacular Cloud</title>    
+    <link rel="stylesheet" href="../css/prj/core.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Otomanopee One">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Palanquin Dark">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Palanquin">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sumana">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source Code Pro">
+    <link rel="stylesheet" href="https://fontlibrary.org//face/go-mono" media="screen" type="text/css"/>
+
+    <script type="application/ld+json">
+      {{ json_ld | safe }}
+    </script>
+
+  </head>
+  <body>
+    
+    <header>
+      <h1>Vernacular Cloud</h1>
+      <p>Here is an overview. <small>version {{ version }}</small></p>
+    </header>
+
+    <main>
+      <h1>concept: {{ title }}</h1>
+      <p>concept-key: <a href="https://vernacular.cloud/0.0.1/{{ uuid }}">https://vernacular.cloud/0.0.1/{{ uuid }}</a></p>
+      {{ html_main_content | safe }}
+    </main>
+
+    <aside>
+      <h1>Notes</h1>
+      {{ html_aside_content | safe }}
+    </aside>
+
+    <footer>
+      <small>Copyright &copy; <time datetime="2025">2025 </time>Vernacular Cloud LLC. version {{ version }}</small>
+    </footer>
+
+  </body>
+</html>
