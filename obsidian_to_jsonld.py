@@ -4,7 +4,7 @@ import json
 import frontmatter
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
-from bs4 import BeautifulSoup
+from html.parser import HTMLParser
 
 # --- CONFIGURATION ---
 BASE_DIR = Path(__file__).resolve().parent
@@ -80,24 +80,127 @@ def process_text_links(text):
 
     return text 
 
+class SmartHTMLFormatter(HTMLParser):
+    def __init__(self, indent_width=2):
+        super().__init__()
+        self.indent_width = indent_width
+        self.level = 0
+        self.formatted = []
+        
+        # Tags that define the SKELETON (Always break lines around them)
+        self.structural_tags = {
+            'html', 'head', 'body', 'header', 'footer', 'main', 'aside', 
+            'section', 'div', 'ul', 'ol', 'script', 'style', 'meta', 'link'
+        }
+        
+        # Tags that define CONTENT (Start on new line, but keep text inline)
+        self.content_tags = {
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'title', 'blockquote', 'small'
+        }
+        
+        self.void_tags = {'meta', 'link', 'img', 'br', 'hr', 'input'}
+        
+        # State tracking
+        self.just_opened_block = False
+
+    def _add_newline_if_needed(self):
+        if self.formatted and not self.formatted[-1].endswith('\n'):
+            self.formatted.append('\n')
+
+    def _indent(self):
+        self.formatted.append(' ' * (self.level * self.indent_width))
+
+    def handle_starttag(self, tag, attrs):
+        # 1. Logic for Structural Tags (ul, div, main)
+        if tag in self.structural_tags:
+            self._add_newline_if_needed()
+            self._indent()
+            
+            # Reconstruct tag
+            attr_str = ''.join(f' {k}="{v}"' if v else f' {k}' for k, v in attrs)
+            self.formatted.append(f"<{tag}{attr_str}>")
+            
+            if tag not in self.void_tags:
+                self.level += 1
+                self.just_opened_block = True
+
+        # 2. Logic for Content Tags (p, h1, li)
+        elif tag in self.content_tags:
+            self._add_newline_if_needed()
+            self._indent()
+            
+            attr_str = ''.join(f' {k}="{v}"' if v else f' {k}' for k, v in attrs)
+            self.formatted.append(f"<{tag}{attr_str}>")
+            
+            # We do NOT add a newline here. We wait for text.
+            self.just_opened_block = True
+            
+        # 3. Inline Tags (a, span, strong)
+        else:
+            # Just append inline
+            attr_str = ''.join(f' {k}="{v}"' if v else f' {k}' for k, v in attrs)
+            self.formatted.append(f"<{tag}{attr_str}>")
+            self.just_opened_block = False
+
+    def handle_endtag(self, tag):
+        # 1. Structural Tags
+        if tag in self.structural_tags:
+            if tag not in self.void_tags:
+                self.level -= 1
+                self._add_newline_if_needed()
+                self._indent()
+            self.formatted.append(f"</{tag}>")
+            self.just_opened_block = False
+
+        # 2. Content Tags
+        elif tag in self.content_tags:
+            # If we are closing a content tag, we check:
+            # Did we just finish a nested block (like a <ul> inside a <li>)?
+            # If yes, we are on a new line, so we need to indent.
+            # If no (we just had text), we close on the same line.
+            if self.formatted and self.formatted[-1].endswith('\n'):
+                 self._indent()
+            
+            self.formatted.append(f"</{tag}>")
+            self.just_opened_block = False
+
+        # 3. Inline Tags
+        else:
+            self.formatted.append(f"</{tag}>")
+
+    def handle_data(self, data):
+        stripped = data.strip()
+        if not stripped: return
+
+        # If we just opened a STRUCTURAL block (like <ul>), we need a newline before text
+        # (Though valid HTML rarely has raw text directly inside <ul>)
+        if self.just_opened_block and self.formatted[-1].endswith('>'):
+             # Check if the last tag was structural
+             last_tag_line = self.formatted[-1]
+             # If strictly structural, maybe force newline? 
+             # For now, let's keep it simple: Text always appends.
+             pass
+
+        self.formatted.append(data)
+        # We consumed the "just opened" state
+        self.just_opened_block = False
     
-def pass_one_index_uuids():
-    """Scans all files to build a map of 'Title -> UUID'."""
-    print("--- Building Index ---")
-    if not SOURCE_DIR.exists():
-        print(f"ERROR: Source directory not found at {SOURCE_DIR}")
-        return
+    def handle_decl(self, decl):
+        self.formatted.append(f"<!{decl}>\n")
 
-    for file_path in get_files():
-        try:
-            post = frontmatter.load(file_path)
-            uuid = post.metadata.get('concept-key')
-            if uuid:
-                title = file_path.stem.lower() 
-                concept_index[title] = uuid
-        except Exception as e:
-            print(f"Error indexing {file_path}: {e}")
-
+    def handle_comment(self, data):
+        self._add_newline_if_needed()
+        self._indent()
+        self.formatted.append(f"")
+        
+def prettify_html(html_content):
+    formatter = SmartHTMLFormatter(indent_width=2)
+    formatter.feed(html_content)
+    # Join and clean up multiple newlines
+    output = "".join(formatter.formatted)
+    # Simple regex to remove excessive blank lines (optional)
+    return re.sub(r'\n\s*\n', '\n', output)
+    
 def parse_sections(content):
     """Splits markdown content by H1 headers."""
     sections = {}
@@ -250,13 +353,29 @@ def double_indent(html):
         html
     )
 
+def pass_one_index_uuids():
+    """Scans all files to build a map of 'Title -> UUID'."""
+    print("--- Building Index ---")
+    if not SOURCE_DIR.exists():
+        print(f"ERROR: Source directory not found at {SOURCE_DIR}")
+        return
+
+    for file_path in get_files():
+        try:
+            post = frontmatter.load(file_path)
+            uuid = post.metadata.get('concept-key')
+            if uuid:
+                title = file_path.stem.lower() 
+                concept_index[title] = uuid
+        except Exception as e:
+            print(f"Error indexing {file_path}: {e}")
+
 def pass_two_build_site():
     print("--- Generating Site ---")
     
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
     template = env.get_template("skos_concept.html")
     
-    # Ensure the 0.0.1 folder exists
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     
     for file_path in get_files():
@@ -271,27 +390,29 @@ def pass_two_build_site():
         html_main = render_html_main(sections)
         html_aside = render_html_aside(sections)
         
-        output_html = template.render(
+        # Render the raw HTML from Jinja
+        raw_html = template.render(
             title=title,
             html_main_content=html_main,
             html_aside_content=html_aside,
-            json_ld=json.dumps(skos_data, indent=2),
+            json_ld=json.dumps(skos_data, indent=8),
             uuid=uuid,
             version=VERSION
         )
         
-        pretty_html = BeautifulSoup(output_html, "html.parser").prettify()
-        pretty_indent2 = double_indent(pretty_html)
+        # --- NEW FORMATTING LOGIC ---
+        # 1. Use the custom Smart Formatter
+        final_html = prettify_html(raw_html)
         
-        # CHANGED: Write directly to {UUID}.html in the output dir
+        # 2. Write to file
         filename = f"{uuid}.html"
         target_file = OUTPUT_DIR / filename
         
         with open(target_file, "w", encoding="utf-8") as f:
-            f.write(pretty_indent2)
+            f.write(final_html)
             
     print(f"Build Complete. Files written to {OUTPUT_DIR}")
-
+    
 if __name__ == "__main__":
     pass_one_index_uuids()
     pass_two_build_site()
