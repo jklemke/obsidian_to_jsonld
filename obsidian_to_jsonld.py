@@ -64,7 +64,7 @@ def process_text_links(text):
             # OLD: return f'<a href="{target_uuid}.html" ...            
             # NEW: Absolute path to the directory (matches the JSON-LD ID)
             # Note: We ensure there is NO .html extension.
-            return f'<a href="/{VERSION}/{target_uuid}" class="internal-link">{label_text}</a>'            
+            return f'<a href="/{VERSION}/{target_uuid}/" class="internal-link">{label_text}</a>'            
         else:
             return label_text
 
@@ -230,7 +230,7 @@ def generate_skos_json(uuid, title, sections):
             "dct": "http://purl.org/dc/terms/"  # Optional: Good for 'modified' dates later
         },
         
-        "@id": f"{DOMAIN}/{VERSION}/{uuid}", 
+        "@id": f"{DOMAIN}/{VERSION}/{uuid}/", 
         "@type": "skos:Concept",
         "skos:prefLabel": title
     }
@@ -246,7 +246,7 @@ def generate_skos_json(uuid, title, sections):
                 target_uuid = concept_index.get(link_text)
                 if target_uuid:
                     # CLEAN URL: No .html here
-                    uris.append(f"{DOMAIN}/{VERSION}/{target_uuid}")
+                    uris.append(f"{DOMAIN}/{VERSION}/{target_uuid}/")
             if uris:
                 json_ld[skos_prop] = uris if len(uris) > 1 else uris[0]
 
