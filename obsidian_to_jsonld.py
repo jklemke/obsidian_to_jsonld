@@ -222,8 +222,14 @@ def parse_sections(content):
 
 def generate_skos_json(uuid, title, sections):
     json_ld = {
-        "@context": "https://www.w3.org/2004/02/skos/core#",
-        # CLEAN URL: No .html here
+        # OLD: "@context": "https://www.w3.org/2004/02/skos/core#",
+        
+        # NEW: Define the prefix explicitly locally
+        "@context": {
+            "skos": "http://www.w3.org/2004/02/skos/core#",
+            "dct": "http://purl.org/dc/terms/"  # Optional: Good for 'modified' dates later
+        },
+        
         "@id": f"{DOMAIN}/{VERSION}/{uuid}", 
         "@type": "skos:Concept",
         "skos:prefLabel": title
@@ -397,7 +403,7 @@ def pass_two_build_site():
             title=title,
             html_main_content=html_main,
             html_aside_content=html_aside,
-            json_ld=json.dumps(skos_data, indent=8),
+            json_ld=json.dumps(skos_data, indent=2),
             uuid=uuid,
             version=VERSION
         )
@@ -424,11 +430,6 @@ def pass_two_build_site():
     print(f"Build Complete. Files written to {OUTPUT_DIR}")
     
 if __name__ == "__main__":
-    # 1. Build the site
     pass_one_index_uuids()
     pass_two_build_site()
-    
-    # 2. Serve if requested
-    if args.serve:
-        serve(port=args.port)
 
