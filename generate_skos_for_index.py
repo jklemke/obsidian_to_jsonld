@@ -86,14 +86,19 @@ class SmartHTMLFormatter(HTMLParser):
 
     def handle_data(self, data):
         stripped = data.strip()
-        if not stripped: return
+        
+        # MODIFIED CHECK:
+        # If stripped is empty, we usually discard it.
+        # BUT, if 'data' contains a non-breaking space (\xa0), we must keep it.
+        if not stripped and '\xa0' not in data: 
+            return
 
         if self.just_opened_block and self.formatted and self.formatted[-1].endswith('>'):
              pass
 
         self.formatted.append(data)
-        self.just_opened_block = False
-    
+        self.just_opened_block = False    
+        
     def handle_decl(self, decl):
         self.formatted.append(f"<!{decl}>\n")
 
@@ -164,7 +169,10 @@ def inject_into_html(json_data, html_path):
     print(f"💉 Injecting JSON-LD into {html_path}...")
     
     with open(html_path, "r", encoding="utf-8") as f:
-        soup = BeautifulSoup(f, "html.parser")
+#        soup = BeautifulSoup(f, "html.parser")
+        soup = BeautifulSoup(f, "html5lib")
+#        soup = BeautifulSoup(f, "lxml")        
+
 
     # Find the JSON-LD script tag
     script_tag = soup.find("script", {"type": "application/ld+json"})
@@ -182,7 +190,8 @@ def inject_into_html(json_data, html_path):
         script_tag.string = f"\n{indented_json}\n"
         
         # 4. Get raw HTML string from BeautifulSoup
-        raw_html = str(soup)
+        # raw_html = str(soup)
+        raw_html = soup.encode(formatter="html").decode("utf-8")
         
         # 5. Run it through SmartHTMLFormatter
         final_html = prettify_html(raw_html)
