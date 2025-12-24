@@ -25,14 +25,14 @@
       <h1>Vernacular Cloud</h1><nav>
       <ul class="navlist">
         <li><a href="/">Home</a></li>
-        <li><a href="/about.html">About</a></li>
+        <li><a href="/about">About</a></li>
       </ul></nav>
     </header>
 
     <main>
 
       <h1>The Vernacular Cloud SKOS concept scheme</h1>
-      <p>These are the top concepts of the skos:ConceptScheme. They are the metaphysical entry points into the system.</p>
+      <p>These are the top concepts of the skos:ConceptScheme. They constitute the metaphysical entry points into the system.</p>
       <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format with this canonical URL structure: https://vernacular.cloud/version/UUID</p>
       {% for concept in top_concepts %}
       <h2><a href="{{ concept.url }}">{{ concept.name }}</a></h2>
@@ -57,7 +57,7 @@
     </aside>
 
     <footer>
-      <small>Copyright © <time datetime="2025">2025 </time>Vernacular Cloud LLC</small>
+      <small>Copyright © <time datetime="2025">2025 </time>Vernacular Cloud LLC <a href="mailto:victor.badinage@vernacular.cloud">victor.badinage@vernacular.cloud</a></small>
     </footer>
 
 </body>
