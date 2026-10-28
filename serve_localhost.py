@@ -1,42 +1,35 @@
-import os
 import http.server
 import socketserver
 import functools
-from pathlib import Path
 
-# --- CONFIGURATION ---
-# Assumes this script is in the same folder as obsidian_to_jsonld.py
-# We want to serve the PARENT of "0.0.1" so that /0.0.1/uuid and /css/ paths work.
-BASE_DIR = Path(__file__).resolve().parent
-SITE_ROOT = BASE_DIR / "../../html/vernacular-cloud-003"
-PORT = 8899
+# --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
+# We serve the site root (the PARENT of the version folders) so that
+# /<version>/<uuid>/ and /css/ paths resolve exactly as they do on the live site.
+from vc_config import SITE_DIR, VERSION, PORT
+
 
 def serve():
-    if not SITE_ROOT.exists():
-        print(f"Error: Site root not found at {SITE_ROOT}")
-        print("Did you run the builder script first?")
+    if not SITE_DIR.exists():
+        print(f"Error: Site root not found at {SITE_DIR}")
+        print("Check site_dir in config.toml.")
         return
+    if not (SITE_DIR / VERSION).exists():
+        print(f"Warning: no build for version {VERSION} yet. Run obsidian_to_jsonld.py first.")
 
-    # Change to the site root so "http://localhost:8899/" points here
-    os.chdir(SITE_ROOT)
-    
-    Handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=".")
+    Handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(SITE_DIR))
     socketserver.TCPServer.allow_reuse_address = True
 
-    try:
-        with socketserver.TCPServer(("", PORT), Handler) as httpd:
-            print(f"\n--- Vernacular Cloud Dev Server ---")
-            print(f"    URL:  http://localhost:{PORT}/0.0.1/")
-            print(f"    Root: {SITE_ROOT}")
-            print(f"    Mode: Directory Index (Clean URLs)")
-            print("\n    Press Ctrl+C to stop...")
-            
+    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+        print(f"\n--- Vernacular Cloud Dev Server ---")
+        print(f"    Home:     http://localhost:{PORT}/")
+        print(f"    Version:  http://localhost:{PORT}/{VERSION}/concept-scheme/")
+        print(f"    Root:     {SITE_DIR}")
+        print("\n    Press Ctrl+C to stop...")
+        try:
             httpd.serve_forever()
-            
-    except KeyboardInterrupt:
-        print("\n--- Server Stopped by User ---")
-        httpd.server_close()
+        except KeyboardInterrupt:
+            print("\n--- Server Stopped by User ---")
+
 
 if __name__ == "__main__":
     serve()
-    

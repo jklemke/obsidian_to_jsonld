@@ -1,20 +1,20 @@
-import os
+import argparse
 import re
 import json
+import shutil
+import sys
 import frontmatter
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from html.parser import HTMLParser
 
-# --- CONFIGURATION ---
-BASE_DIR = Path(__file__).resolve().parent
-# Adjusted relative path based on your setup
-SOURCE_DIR = BASE_DIR / "../../../Dropbox/docs/Knowledge Mgt/Obsidian markdown/VernacularCloud"
-OUTPUT_DIR = BASE_DIR / "../../html/vernacular-cloud-003/0.0.1"
-TEMPLATE_DIR = BASE_DIR / "templates"
+# --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
+from vc_config import (
+    VERSION, DOMAIN, VAULT_DIR, SITE_DIR, OUTPUT_DIR, TEMPLATE_DIR,
+    SCHEME_URI, concept_uri, check_paths,
+)
 
-VERSION = "0.0.1"
-DOMAIN = "https://vernacular.cloud"
+SOURCE_DIR = VAULT_DIR
 
 # Mapping Markdown Headers to SKOS properties
 HEADER_TO_SKOS = {
@@ -34,8 +34,9 @@ HEADER_TO_SKOS = {
 concept_index = {}
 
 def get_files():
-    """Yields all markdown files in the source directory."""
-    return Path(SOURCE_DIR).glob("*.md")
+    """Markdown files in the vault ROOT only. Subfolders (the book, research
+    notes, templates) are deliberately ignored: glob("*.md") does not recurse."""
+    return sorted(Path(SOURCE_DIR).glob("*.md"))
 
 def clean_link_text(text):
     """Extracts text from [[Link]] or returns raw text."""
@@ -189,17 +190,15 @@ def parse_sections(content):
     return sections
 
 def generate_skos_json(uuid, title, sections):
-    scheme_uri = f"{DOMAIN}/{VERSION}/concept-scheme/"    
-
     json_ld = {
         "@context": {
             "skos": "http://www.w3.org/2004/02/skos/core#",
             "dct": "http://purl.org/dc/terms/"
         },
-        "@id": f"{DOMAIN}/{VERSION}/{uuid}/", 
+        "@id": concept_uri(uuid),
         "@type": "skos:Concept",
         "skos:prefLabel": title,
-        "skos:inScheme": scheme_uri
+        "skos:inScheme": SCHEME_URI
     }
 
     for header, lines in sections.items():
@@ -212,7 +211,7 @@ def generate_skos_json(uuid, title, sections):
                 link_text = clean_link_text(line).lower()
                 target_uuid = concept_index.get(link_text)
                 if target_uuid:
-                    uris.append(f"{DOMAIN}/{VERSION}/{target_uuid}/")
+                    uris.append(concept_uri(target_uuid))
             if uris:
                 json_ld[skos_prop] = uris if len(uris) > 1 else uris[0]
 
@@ -291,7 +290,7 @@ def render_html_aside(sections):
         
     return "\n".join(html_parts)
 
-def generate_concept_scheme(all_concepts, output_dir, version="0.0.1"):
+def generate_concept_scheme(all_concepts, output_dir, version=VERSION):
     """Generates the root index.html containing the SKOS ConceptScheme."""
     print("--- Generating Concept Scheme ---")
     
@@ -311,14 +310,14 @@ def generate_concept_scheme(all_concepts, output_dir, version="0.0.1"):
             label = Path(concept['filename']).stem
             
             if uuid:
-                concept_uri = f"https://vernacular.cloud/{version}/{uuid}/"
-                
+                uri = concept_uri(uuid)
+
                 # Append to JSON-LD list (Standard SKOS)
-                jsonld_links.append({"@id": concept_uri})
-                
+                jsonld_links.append({"@id": uri})
+
                 # Append to HTML list (Rich Data)
                 html_render_list.append({
-                    "url": concept_uri,
+                    "url": uri,
                     "name": label,
                     "uuid": uuid
                 })
@@ -334,8 +333,7 @@ def generate_concept_scheme(all_concepts, output_dir, version="0.0.1"):
         },
         "@graph": [
             {
-                # UPDATED: Added trailing slash to match directory structure
-                "@id": f"https://vernacular.cloud/{version}/concept-scheme/",
+                "@id": SCHEME_URI,
                 "@type": "skos:ConceptScheme",
                 "dc:title": "Vernacular Cloud",
                 "dc:creator": "Victor Badinage",
@@ -406,9 +404,11 @@ def pass_two_build_site_and_collect():
         return []
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     all_concepts_data = []
-    
+    pages_written = 0
+    skipped_no_key = []
+
     for file_path in get_files():
         try:
             post = frontmatter.load(file_path)
@@ -422,7 +422,8 @@ def pass_two_build_site_and_collect():
             }
             all_concepts_data.append(note_data)
 
-            if not uuid: 
+            if not uuid:
+                skipped_no_key.append(file_path.name)
                 continue # Skip HTML generation if no UUID
             
             # --- HTML GENERATION LOGIC ---
@@ -439,7 +440,8 @@ def pass_two_build_site_and_collect():
                 html_aside_content=html_aside,
                 json_ld=json.dumps(skos_data, indent=2),
                 uuid=uuid,
-                version=VERSION
+                version=VERSION,
+                domain=DOMAIN
             )
             
             final_html = prettify_html(raw_html)
@@ -449,17 +451,54 @@ def pass_two_build_site_and_collect():
             target_file = concept_dir / "index.html"
             
             with open(target_file, "w", encoding="utf-8") as f:
-                f.write(final_html) 
-                
+                f.write(final_html)
+            pages_written += 1
+
         except Exception as e:
             print(f"Error processing {file_path.name}: {e}")
-            
-    print(f"Build Complete. Files written to {OUTPUT_DIR}")
+
+    print(f"Build Complete. {pages_written} concept pages written to {OUTPUT_DIR}")
+    print(f"   {len(skipped_no_key)} root notes skipped (no concept-key).")
     return all_concepts_data
 
+def prepare_output_dir(rebuild):
+    """Each version is built into its own, freshly emptied folder, so pages
+    for renamed or deleted concepts never linger. An existing version folder
+    is only replaced when --rebuild is given, which protects published
+    permalinks of earlier releases."""
+    if OUTPUT_DIR.exists():
+        if not rebuild:
+            print(f"❌ {OUTPUT_DIR} already exists.")
+            print("   To make a new release, change 'version' in config.toml.")
+            print(f"   To regenerate {VERSION} from scratch, run again with --rebuild.")
+            return False
+        # Safety: only ever delete <site_dir>/<x.y.z>
+        if OUTPUT_DIR.parent.resolve() != SITE_DIR.resolve() or OUTPUT_DIR.name != VERSION:
+            print(f"❌ Refusing to delete unexpected folder {OUTPUT_DIR}")
+            return False
+        print(f"🧹 Removing previous build of {VERSION} at {OUTPUT_DIR}")
+        shutil.rmtree(OUTPUT_DIR)
+    return True
+
 def main():
+    parser = argparse.ArgumentParser(description="Build the vernacular.cloud site from the Obsidian vault.")
+    parser.add_argument("--rebuild", action="store_true",
+                        help="delete and regenerate the folder for the configured version")
+    args = parser.parse_args()
+
+    problems = check_paths()
+    if problems:
+        for p in problems:
+            print(f"❌ {p}")
+        print("   Fix the paths in config.toml.")
+        sys.exit(1)
+
+    print(f"🔖 Version {VERSION}")
     print(f"📂 Scanning files in {SOURCE_DIR}...")
-    
+
+    if not prepare_output_dir(args.rebuild):
+        sys.exit(1)
+
     # 1. Build the Global Index (Required for linking)
     pass_one_index_uuids()
     

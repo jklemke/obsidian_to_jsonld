@@ -1,0 +1,18 @@
+# Vernacular Cloud build settings.
+# This is the only file you should need to edit between builds.
+
+# Release being built. Each release goes to its own folder:  <site_dir>/<version>/
+version = "0.0.1"
+
+domain = "https://vernacular.cloud"
+
+# Concept used as skos:broader for every concept listed in the root index.html
+root_concept_key = "nU2JNEcOO9ZHxSlpZMwbCgOG"
+
+# Paths may be absolute, or relative to the folder this file is in.
+# Single quotes = TOML literal strings, so Windows backslashes need no escaping.
+vault_dir = 'C:\Users\joekl\Dropbox\Knowledge Mgt\Personal Knowledge Mgt\00 to 09 Metadata\09 Archive\Obsidian Markdown\VernacularCloud'
+site_dir  = '../vernacular-cloud-003'
+
+# Local review server (serve_localhost.py)
+port = 8899

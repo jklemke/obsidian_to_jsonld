@@ -1,21 +1,17 @@
 import json
-import os
 import re
+import shutil
 import frontmatter
 from pathlib import Path
 from bs4 import BeautifulSoup
 from html.parser import HTMLParser
 
-# --- CONFIGURATION ---
-BASE_DIR = Path(__file__).resolve().parent
-HTML_FILE = BASE_DIR / "../../html/vernacular-cloud-003/index.html"
-# HTML_FILE = Path("index.html") # (Fallback for testing)
-MARKDOWN_DIR = BASE_DIR / "../../../Dropbox/docs/Knowledge Mgt/Obsidian markdown/VernacularCloud" 
+# --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
+from vc_config import DOMAIN, VERSION, VAULT_DIR, SITE_DIR, SCHEME_URI, ROOT_CONCEPT_URI
 
-DOMAIN = "https://vernacular.cloud"
-VERSION = "0.0.1"
-SCHEME_URI = f"{DOMAIN}/{VERSION}/concept-scheme/"
-ROOT_UUID = "https://vernacular.cloud/0.0.1/nU2JNEcOO9ZHxSlpZMwbCgOG/"
+HTML_FILE = SITE_DIR / "index.html"
+MARKDOWN_DIR = VAULT_DIR
+ROOT_UUID = ROOT_CONCEPT_URI
 
 # --- FORMATTER CLASS (From your snippet) ---
 class SmartHTMLFormatter(HTMLParser):
@@ -167,6 +163,9 @@ def make_absolute(url):
 def inject_into_html(json_data, html_path):
     """Finds the script tag, replaces content, and formats HTML."""
     print(f"💉 Injecting JSON-LD into {html_path}...")
+    backup = Path(str(html_path) + ".bak")
+    shutil.copy2(html_path, backup)
+    print(f"   Backup of previous version saved as {backup.name}")
     
     with open(html_path, "r", encoding="utf-8") as f:
 #        soup = BeautifulSoup(f, "html.parser")

@@ -1,2 +1,6 @@
 # Notepad++ backups
 *.bak
+
+# Python
+.venv/
+__pycache__/
