@@ -2,7 +2,7 @@
 # This is the only file you should need to edit between builds.
 
 # Release being built. Each release goes to its own folder:  <site_dir>/<version>/
-version = "0.0.1"
+version = "0.0.2"
 
 domain = "https://vernacular.cloud"
 

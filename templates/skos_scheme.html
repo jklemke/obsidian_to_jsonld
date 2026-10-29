@@ -33,7 +33,7 @@
 
       <h1>The Vernacular Cloud SKOS concept scheme</h1>
       <p>These are the top concepts of the skos:ConceptScheme. They constitute the metaphysical entry points into the system.</p>
-      <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format with this canonical URL structure: https://vernacular.cloud/version/UUID</p>
+      <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format with this canonical URL structure: https://vernacular.cloud/{version}/UUID</p>
       {% for concept in top_concepts %}
       <h2><a href="{{ concept.url }}">{{ concept.name }}</a></h2>
       <p><a href="{{ concept.url }}">{{ concept.url }}</a></p>
