@@ -7,6 +7,7 @@ import frontmatter
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from html.parser import HTMLParser
+from vault_clean import publishable_sections, placeholder_count, review
 
 # --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
 from vc_config import (
@@ -24,6 +25,7 @@ HEADER_TO_SKOS = {
     "Related": "skos:related",
     "Alternative Label": "skos:altLabel",
     "Editorial Note": "skos:editorialNote",
+    "Change Note": "skos:changeNote",
     "History Note": "skos:historyNote",
     "Scope Note": "skos:scopeNote",
     "Example": "skos:example"
@@ -173,21 +175,10 @@ def prettify_html(html_content):
     return re.sub(r'\n\s*\n', '\n', output)
     
 def parse_sections(content):
-    """Splits markdown content by H1 headers."""
-    sections = {}
-    current_header = None
-    lines = content.split('\n')
-    
-    for line in lines:
-        header_match = re.match(r'^#\s+(.*)', line)
-        if header_match:
-            current_header = header_match.group(1).strip()
-            sections[current_header] = []
-        elif current_header:
-            if line.strip(): 
-                sections[current_header].append(line.strip())
-                
-    return sections
+    """The published SKOS sections of a note (vault_clean.publishable_sections):
+    only SKOS headings, nothing after # Work in Progress, and no comments,
+    tasks or template placeholders. A section left empty is skipped."""
+    return publishable_sections(content)
 
 def generate_skos_json(uuid, title, sections):
     json_ld = {
@@ -534,6 +525,18 @@ def main():
         generate_concept_scheme(all_concepts, OUTPUT_DIR, version=VERSION)
     else:
         print("❌ No concepts found. Check SOURCE_DIR path.")
+
+    # 4. To-do count for the content walkthrough (placeholders are never published)
+    stubs = [f.stem for f in get_files()
+             if placeholder_count(f.read_text(encoding="utf-8", errors="replace"))]
+    if stubs:
+        print(f"📝 {len(stubs)} notes still contain template placeholders (not published).")
+    ruled = [f.stem for f in get_files()
+             if any(k.startswith("---") for k, _ in review(f.read_text(encoding="utf-8", errors="replace"))[0])]
+    if ruled:
+        print(f"⚠️ {len(ruled)} notes have text after a --- inside a published section (it IS published): "
+              + ", ".join(ruled[:8]) + (" …" if len(ruled) > 8 else ""))
+        print("   Replace the --- with  # Work in Progress  if that text is private.")
 
 if __name__ == "__main__":
     main()

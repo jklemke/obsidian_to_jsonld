@@ -1,6 +1,7 @@
 """Render the versioned index page, the root redirect and the About page.
 
-    templates/index.html       (hand-crafted section structure, Jinja2)
+    templates/index.html       (hand-crafted section headings, Jinja2)
+  + child links from the vault (each parent's # Narrower list, D-009)
   + definitions from the vault (# Definition section of each concept note)
   -> <site_dir>/<version>/index.html   the index for this version, with JSON-LD
   -> <site_dir>/index.html             a small page that redirects to /<version>/
@@ -24,6 +25,7 @@ from urllib.parse import urljoin
 import frontmatter
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
+from vault_clean import clean_lines, before_wip
 
 # --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
 from vc_config import (
@@ -63,7 +65,7 @@ def parse_definition_from_md(content):
                 break
         if capturing:
             definition_lines.append(line)
-    return normalize_text(definition_lines)
+    return normalize_text(clean_lines(definition_lines))
 
 
 def build_definition_map(source_dir):
@@ -77,14 +79,44 @@ def build_definition_map(source_dir):
             continue
         uuid = post.metadata.get('concept-key')
         if uuid:
-            definition = parse_definition_from_md(post.content)
+            definition = parse_definition_from_md(before_wip(post.content))
             if definition:
                 def_map[uuid] = definition
     print(f"✅ Indexed {len(def_map)} definitions.")
     return def_map
 
 
-# --- JSON-LD FROM THE TEMPLATE'S SECTION STRUCTURE ---
+# --- CONCEPT DATA FOR THE TEMPLATE'S section() MACRO ---
+
+def build_concepts(vault):
+    """{key: {"label": vault file name, "narrower": [{"key", "label"}, ...]}}
+    for every note with a concept-key; children keep the # Narrower order."""
+    import sync_hierarchy
+    notes, resolve = sync_hierarchy.load(vault)
+    concepts, skipped = {}, []
+    for n in notes.values():
+        if not n.key:
+            continue
+        kids = []
+        for name in n.links("narrower"):
+            c = resolve(name)
+            if c and c.key and c.stem != n.stem:
+                kids.append({"key": c.key, "label": c.stem})
+            else:
+                skipped.append(f"{n.stem} → [[{name}]]")
+        concepts[n.key] = {"label": n.stem, "narrower": kids}
+    return concepts, skipped
+
+
+def check_section_keys(template_text, concepts):
+    keys = re.findall(r'section\("([A-Za-z0-9_-]{24})"', template_text)
+    missing = [k for k in keys if k not in concepts]
+    for k in missing:
+        print(f"   ⚠️ templates/index.html: section key {k} has no note in the vault")
+    return keys
+
+
+# --- JSON-LD FROM THE RENDERED SECTION STRUCTURE ---
 
 def absolute_uri(href):
     """Resolve a link in the template against this version's folder.
@@ -216,11 +248,22 @@ def main():
     template_text = (TEMPLATE_DIR / INDEX_TEMPLATE).read_text(encoding="utf-8")
 
     definition_map = build_definition_map(VAULT_DIR)
-    json_ld = build_jsonld(template_text, definition_map)
+    concepts, skipped = build_concepts(VAULT_DIR)
+    keys = check_section_keys(template_text, concepts)
+    used = {k for k in keys if k in concepts}
+    for line in skipped:
+        parent = line.split(" → ")[0]
+        if any(concepts[k]["label"] == parent for k in used):
+            print(f"   ⚠️ not on the index (no concept-key or no such note): {line}")
 
-    html = env.get_template(INDEX_TEMPLATE).render(
+    # Render once to get the section structure, then again with the JSON-LD.
+    template = env.get_template(INDEX_TEMPLATE)
+    draft = template.render(version=VERSION, domain=DOMAIN, concepts=concepts, json_ld="{}")
+    json_ld = build_jsonld(draft, definition_map)
+    html = template.render(
         version=VERSION,
         domain=DOMAIN,
+        concepts=concepts,
         json_ld=json.dumps(json_ld, indent=2, ensure_ascii=False),
     )
     out_file = OUTPUT_DIR / "index.html"
