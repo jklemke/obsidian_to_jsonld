@@ -1,0 +1,263 @@
+{#
+  Hand-crafted index for vernacular.cloud. Edit the section structure here.
+  generate_skos_for_index.py renders this to <site_dir>/<version>/index.html
+  and fills in the JSON-LD from the vault.
+  Concept links are RELATIVE (href="<key>/"), so they resolve inside whichever
+  version folder the page is published to. Do not add /<version>/ to them.
+-#}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="ALL" name="ROBOTS">
+    <meta content="Vernacular Cloud LLC" name="Copyright">
+    <meta content="vernacular cloud taxonomy with json-ld" name="description">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Vernacular Cloud</title>
+    <link href="/css/prj/core.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Otomanopee One" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Palanquin Dark" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Palanquin" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Sumana" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source Code Pro" rel="stylesheet">
+    <link href="https://fontlibrary.org//face/go-mono" media="screen" rel="stylesheet" type="text/css">
+    <script type="application/ld+json">
+      {{ json_ld | indent(6) | safe }}
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>Vernacular Cloud</h1><nav>
+      <ul class="navlist">
+        <li><a href="/{{ version }}/">Home</a></li>
+        <li><a href="/about/">About</a></li>
+      </ul></nav>
+    </header>
+    <main>
+      <h1>The Badinagean taxonomy</h1>
+      <p>Vernacular Cloud is an effort to envangelize the philosophical nomenclature of Victor Badinage. Badinage's thesis is that a new systematic philosophy suitable for the current epoch ought to simultaneously walk two paths: One route pursues hermeneutical and conceptual mastery by human subjects; A second route promulgates the nomenclature using the technology of controlled vocabularies. A systematic philosophy so conceived would thus combine the traditional topics of grammar, dialectic, and rhetoric with the semantic technologies of taxonomy, ontology, knowledge graphs, social media, and so-called AI. </p>
+      <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format with this canonical URL structure: https://vernacular.cloud/version/UUID</p>
+      <section>
+        <header>
+          <h1><a data-pref-label="unsayable" href="w62qBcZ3ILeFl1w6CqqDJHiU/">The Unsayables</a></h1>
+        </header>
+        <p><a class="internal-link" href="UY1P4Uysf7OmjUxwAiBhFKwR/">time</a></p>
+        <p><a class="internal-link" href="WD0gGEVWXi4Ctbe8xx1cmaKk/">space</a></p>
+        <p><a class="internal-link" href="kc0R8iLD9mwWw8Yrk6Hs70n8/">pattern</a></p>
+        <p><a class="internal-link" href="hh7FtWkzi3TJq2ghNCy8FF6P/">isolate</a></p>
+        <p><a class="internal-link" href="Py4RzQRMHpIY4YDuCrkE1KHI/">aggregate</a></p>
+        <p><a class="internal-link" href="cD0QXXNhlmoMbt6tlA6PoJdA/">void</a></p>
+        <p><a class="internal-link" href="v92iWVisjVCXiN2fTN9BQQrR/">subjectivity</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="norm" href="WG45GthDxllqzfVuW8CNXhSx/">The Norms</a></h1>
+        </header>
+        <p><a class="internal-link" href="E55hEovPzdc2W6pm9R6CzLds/">survival</a></p>
+        <p><a class="internal-link" href="zh42DpwF6yQosmOai6snDctY/">flourishing</a></p>
+        <p><a class="internal-link" href="H232lmWlS2xA8IbOzqeFwKWB/">reality</a></p>
+        <p><a class="internal-link" href="SB09JQmq8tx07gCR2SBCdi8b/">meaning</a></p>
+        <p><a class="internal-link" href="Ua3ya064qxs3z88RsvflnWKv/">truth</a></p>
+        <p><a class="internal-link" href="yG60U6xme9uPuXR2bIrKjmSv/">beauty</a></p>
+        <p><a class="internal-link" href="S53pYi2Ecy5tKAIpsh94CHSi/">legitimacy</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="labyrinth of reasons" href="d81ulmOoXIYMIx4XV0rDVx71/">The Labyrinth of Reasons</a></h1>
+        </header>
+        <p><a class="internal-link" href="Nx2c71M45jqOdKckOljDfYNi/">circularity</a></p>
+        <p><a class="internal-link" href="dy6qWcOo3rh1rVJ7jRxs9BvT/">proliferation</a></p>
+        <p><a class="internal-link" href="uI4VykT2Q37ldBQchkqRPyiv/">prejudice</a></p>
+        <p><a class="internal-link" href="b666mFEGP79wX7Re3HTFGdw3/">disputation</a></p>
+        <p><a class="internal-link" href="tW6f1Re6dN3RctLq8NDe4FzR/">subterfuge</a></p>
+        <p><a class="internal-link" href="l55p9vAoezmBlzpTsOiaWD09/">ambiguity</a></p>
+        <p><a class="internal-link" href="Cu6nGt9CyXGdNG4izDYqFlof/">oubliation</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="antinomy" href="hz2pZUx0683mu7Lgbbgf1EnC/">The Antinomies</a></h1>
+        </header>
+        <p><a class="internal-link" href="sT3tFhWe0UxTxJA41K2ypP0f/">Absolute Beginning</a></p>
+        <p><a class="internal-link" href="CE1AWYX9tzdB8DcW2Itn7kqA/">Absolute Description</a></p>
+        <p><a class="internal-link" href="rd3UeRTyS5Dnd71DPebTgP5h/">Absolute Granularity</a></p>
+        <p><a class="internal-link" href="kG3vt7BQDJ2ZoRsLnc7eZvcE/">Absolute Justice</a></p>
+        <p><a class="internal-link" href="Qw5yrtog1GJWmUK8Qt4J9B11/">Absolute Necessity</a></p>
+        <p><a class="internal-link" href="pL7nYHYw04BOPff1oqc1TyA8/">Absolute Perspective</a></p>
+        <p><a class="internal-link" href="Ao0ewLNZ0TGOOalzIgD15wi7/">Absolute Syntax</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="myth" href="yO71oL3pe37DiyGqO8NLWyOl/">The Myths</a></h1>
+        </header>
+        <p><a class="internal-link" href="IC1ObczTI5WhzlZQ9SWQy3Gt/">Myth of the Proven</a></p>
+        <p><a class="internal-link" href="Eu3ily2TgNIEbilqIkdhQeWS/">Myth of the Given</a></p>
+        <p><a class="internal-link" href="gz3XHtg1Y9y0TK2eN2q0fzjO/">Myth of the Coven</a></p>
+        <p><a class="internal-link" href="ST0AmMwHKnG5gciqOaEZeFp7/">Myth of the Nomen</a></p>
+        <p><a class="internal-link" href="zY4Hn4qAM2rU9Iv0M0i0RBGa/">Myth of the Scriven</a></p>
+        <p><a class="internal-link" href="jF29jhlk61ZBEphZse4GjNYP/">Myth of the Maven</a></p>
+        <p><a class="internal-link" href="H76ndDyh6zOcxNVSMK6PlQdz/">Myth of the Haven</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="grammar" href="cc7fO346jkIH5RmKQqZn5gRz/">The Grammar</a></h1>
+        </header>
+        <p><a class="internal-link" href="g02bZLo2HrScAQFk0lx0FPys/">indication</a></p>
+        <p><a class="internal-link" href="EK3xdUxFNXa7k04uLK29ZL7F/">predication</a></p>
+        <p><a class="internal-link" href="EG2k0LQotFe6yCCxyt948zxm/">situation</a></p>
+        <p><a class="internal-link" href="cB4N753U6P1XACSo7FgyfCdu/">stipulation</a></p>
+        <p><a class="internal-link" href="r47LBX6E4m39ONqO3Pk4ASv9/">implication</a></p>
+        <p><a class="internal-link" href="vj7rv9g3r8zYclXiCkVTx6mV/">composition</a></p>
+        <p><a class="internal-link" href="SW6ZlazQ0pOF1zwfHR5ZJbNa/">interrogation</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="semantic realm" href="Qr2LNCDwTh1J0bLQp9sU8Ena/">The Semantics</a></h1>
+        </header>
+        <p><a class="internal-link" href="BT2y5FG6rnmlTkA5DoDZeLWp/">token</a></p>
+        <p><a class="internal-link" href="cJ3zFXIVyBDUvj4wUBJkv4mX/">sentence</a></p>
+        <p><a class="internal-link" href="Hm50me1KwFyc3dGfRxiWAa1L/">thesis</a></p>
+        <p><a class="internal-link" href="qs0tJjLXmj4jKw6OefzSM9y4/">concept</a></p>
+        <p><a class="internal-link" href="IWOmy2xGCNJtOPEf3y9KeQMI/">referent</a></p>
+        <p><a class="internal-link" href="C95CsZilwtF6oNsP3PPuUPTZ/">ostension</a></p>
+        <p><a class="internal-link" href="qV7qPy5FOZ19wcu9JE7JZy69/">metaphor</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="physical realm" href="Vw1OdpM99pvBJdd14YlRYNnq/">The Physical Realms</a></h1>
+        </header>
+        <p><a class="internal-link" href="E23Pztk3kzrYK3jgaQ6tn5Yf/">kinetics</a></p>
+        <p><a class="internal-link" href="Wt7bZnrRvP0yFtoZ4a1rFe8c/">molecularity</a></p>
+        <p><a class="internal-link" href="TW1gTjWtWZ7kz8dcbTYyFvPR/">cosmology</a></p>
+        <p><a class="internal-link" href="WD380qYWToD1T2mYTJzpQFzD/">planetology</a></p>
+        <p><a class="internal-link" href="bV2atMxwqM5rJMVPzHGTuC49/">metabolism</a></p>
+        <p><a class="internal-link" href="uJAACF8YUQAxzj6rjg9ByQWm/">physiology</a></p>
+        <p><a class="internal-link" href="J30JWv1JdkLIXUAT7Mj6NJZH/">ecology</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="practice" href="BB7sS4Fye7gcrCeq4ddoiLwP/">The Practical Realms</a></h1>
+        </header>
+        <p><a class="internal-link" href="DE17QsIQyi8Z1EWZYgujxSf1/">nutrition</a></p>
+        <p><a class="internal-link" href="hS2zNwm1xKklgRYvWpmdVk11/">sentience</a></p>
+        <p><a class="internal-link" href="JM3YR0H2udb5WAScf2tBbXho/">sociality</a></p>
+        <p><a class="internal-link" href="Uj5ezPtqhmRdlb9AL0DqO6IQ/">enaction</a></p>
+        <p><a class="internal-link" href="gp08yi3tcIAqoXOPjgMhEJ7s/">sapience</a></p>
+        <p><a class="internal-link" href="Yy54XCVlbpc2Vf6rQxduTFKF/">abstraction</a></p>
+        <p><a class="internal-link" href="SZWuyuEwXULK6Y3y58gMY7oH/">transcendence</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="conceptual realm" href="Ds2CecvWYHlbmFHob8SsfJL8/">The Conceptual Realms</a></h1>
+        </header>
+        <p><a class="internal-link" href="LG3BiwHe3NOwv43J4scNIvoQ/">ontos</a></p>
+        <p><a class="internal-link" href="pr46k0Y1eaWzBTFEpW4SmgUx/">eidos</a></p>
+        <p><a class="internal-link" href="k32UkkukPU07eUkzKjyTaSuN/">physis</a></p>
+        <p><a class="internal-link" href="TC1Ew2sesgo43hVeamMdKi7S/">telos</a></p>
+        <p><a class="internal-link" href="EL56QYSfy1OCRtChJxyKLv0b/">dynamis</a></p>
+        <p><a class="internal-link" href="Am3OeD4cgsbns5Fu2tOxFrhJ/">energeia</a></p>
+        <p><a class="internal-link" href="uM3N7K7cPbByXkXNLHpxUcSt/">nous</a></p>
+        <p><a class="internal-link" href="k33t5RoaZFc0TQbsafEXnbZF/">psyche</a></p>
+        <p><a class="internal-link" href="JU2OhMSfRNM6vxXzjpED5Fbe/">logos</a></p>
+        <p><a class="internal-link" href="q9DB70djnHz3RQSp2bZ5Lcvm/">aletheia</a></p>
+        <p><a class="internal-link" href="XE3u8oZ03H08qDAhMLfESRGw/">techne</a></p>
+        <p><a class="internal-link" href="nTedTCm2Mgff0zgmfP2yFAxJ/">praxis</a></p>
+        <p><a class="internal-link" href="eI5efxj5y025t4Cl0d9o24Vq/">mythos</a></p>
+        <p><a class="internal-link" href="an4ORRfT7J4Gajvj45n7ScmD/">ethos</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="magisterium" href="mT3lXkZDm3aZ9P95BxixLWF9/">The Magisteria</a></h1>
+        </header>
+        <p><a class="internal-link" href="nd0JXphBo07FrwDWQQimQyur/">EGO</a></p>
+        <p> </p>
+        <p><a class="internal-link" href="sT3gvHTIzWZ3GSTj1UmCAb8b/">WORLD</a></p>
+        <p> </p>
+        <p><a class="internal-link" href="WG5pz7FEPSWajscEegGBZ6D0/">SOCIETY</a></p>
+        <p> </p>
+        <p><a class="internal-link" href="D342PEuGolWobnQ9lsx33JeH/">LANGUAGE</a></p>
+        <p> </p>
+        <p><a class="internal-link" href="iv24iMhdxXDaYA524OC9kIG4/">CONTINGENCY</a></p>
+        <p> </p>
+        <p><a class="internal-link" href="Oq7hkFnk1Sd6VeW0W6HspnG0/">ENTIRETY</a></p>
+        <p> </p>
+        <p><a class="internal-link" href="sl1yCc8kZKcuHJN3rzyjdlAd/">INFINITY</a></p>
+        <p> </p>
+        <p><a class="internal-link" href="Jg4w1mlPMMZP9cTp6cF00ftb/">MORALITY</a></p>
+        <p> </p>
+        <p><a class="internal-link" href="KG1zLAJ5Nl5udgF3tnUzGvfC/">ANAGOGE</a></p>
+        <p> </p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="category" href="q97eKfg4Z2Rsd1w3geDFpjz5/">The Categories</a></h1>
+        </header>
+        <p><a class="internal-link" href="dS0SRhe8WeO8dkJ9gNrw4NDU/">recept-aspect-object</a></p>
+        <p><a class="internal-link" href="pC3Cm3aZT3y7aJXNDwBIYiB3/">external-internal-central</a></p>
+        <p><a class="internal-link" href="wgwaSY0YqA2G5qOSo95TOeVK/">distance-duration-energy</a></p>
+        <p><a class="internal-link" href="iH40kgqODIeKGpwkmfdZAQnQ/">system-scenario-event</a></p>
+        <p><a class="internal-link" href="XL67oG9PsyfwTnxWNbSqhCg6/">first person-second person-third person</a></p>
+        <p><a class="internal-link" href="zd1ju1Gt3yoLowhOpGFotp6M/">edification-piety-emancipation</a></p>
+        <p><a class="internal-link" href="S63ptwf6ebIXyCoKLpTBItoI/">word-sentence-thesis</a></p>
+        <p><a class="internal-link" href="yB2FbcbcOKCX7yrEnyp0eCIC/">name-description-explanation</a></p>
+        <p><a class="internal-link" href="A36zbDfKk3qbCjrigBshwrw1/">compatibility-incompatibility-consequence</a></p>
+        <p><a class="internal-link" href="t3w607rTDOZ8NFlhz3ok87PY/">possible-impossible-necessary</a></p>
+        <p><a class="internal-link" href="UT2MQYijXAHy74rSBNid7fki/">complete-enumerated-bounded</a></p>
+        <p><a class="internal-link" href="M42O834tuuIuGV8J5rW2nr6h/">all-none-final</a></p>
+        <p><a class="internal-link" href="uV5KZmd73fam1Bxbn3Xgsaok/">initial-successor-index</a></p>
+        <p><a class="internal-link" href="V61yZ2oH2PNregvaf9SUtg08/">selectability-divisibility-composability</a></p>
+        <p><a class="internal-link" href="o52YtdOfrck5Aas7gx50eu0q/">loyalty-empathy-fairness</a></p>
+        <p><a class="internal-link" href="bt7q9dtnTDjBjoQJi1BIuzgJ/">liberty-governance-revolt</a></p>
+        <p><a class="internal-link" href="oi65Mv0MQIyRGcXTbjsO0rMN/">percept-notion-concept</a></p>
+        <p><a class="internal-link" href="C52QlgFD2aU1pGhVsJzEi4BT/">suspension-ostension-transcendence</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="cultural realm" href="AU4tk77hLcyy6UgNpKS7NmJA/">The Jurisdictions</a></h1>
+        </header>
+        <p><a class="internal-link" href="eM0D9oAXckZC2OftiPMmeHe0/">technology</a></p>
+        <p><a class="internal-link" href="I17sv48OGxMS4F7vFDdQcdj1/">ritual</a></p>
+        <p><a class="internal-link" href="pI62fFzSqyZt1pJJLI9LHDlr/">art</a></p>
+        <p><a class="internal-link" href="PP5FXdmDB1Po8zTDMnzob3rk/">mathematics</a></p>
+        <p><a class="internal-link" href="US0ubv6SPe3sd2m1P8t31fCc/">commerce</a></p>
+        <p><a class="internal-link" href="ur6GdLjcJIJ9xplJOK2te8y3/">jurisprudence</a></p>
+        <p><a class="internal-link" href="Oy3Fx60WIryuHsYnDqqu5R8A/">ideology</a></p>
+      </section>
+      <section>
+        <header>
+          <h1><a data-pref-label="names of god" href="VI6nVXnv7UGfY88VF1bmYcKy/">The Names of God</a></h1>
+        </header>
+        <p><a class="internal-link" href="qC3z8KIiUHcqXhESWYqsJoEU/">creator</a></p>
+        <p><a class="internal-link" href="lS4mnmZqzKCaKFaHuR2poTWX/">controller</a></p>
+        <p><a class="internal-link" href="FN4QAiD2MDBIBMXan17Csmtg/">provider</a></p>
+        <p><a class="internal-link" href="BV4DoMBYRA4E0EkXwhMxGPk0/">comforter</a></p>
+        <p><a class="internal-link" href="bt1zWak81GHEZ6RUWnLW22tv/">saviour</a></p>
+        <p><a class="internal-link" href="i0b0b1XwdSf8FUyUm4gma4xD/">legitimator</a></p>
+        <p><a class="internal-link" href="pt1k86ipwYXhlyiWq8gr3tHp/">magistrator</a></p>
+      </section>
+      <section>
+        <div class="stacked-subsection">
+          <section>
+            <p> </p>
+            <p> </p>
+            <p> </p>
+          </section>
+        </div>
+      </section>
+    </main>
+    <aside>
+      <h1>Notes</h1>
+      <h2>SKOS and JSON-LD</h2>
+      <p><a class="external-link" href="https://www.w3.org/TR/2009/NOTE-skos-primer-20090818/" rel="noopener noreferrer" target="_blank">SKOS primer</a></p>
+      <p><a class="external-link" href="https://json-ld.org/" rel="noopener noreferrer" target="_blank">JSON-LD</a></p>
+      <h2>Category Systems</h2>
+      <p><a class="external-link" href="https://en.wikipedia.org/wiki/Categories_(Aristotle)#The_praedicamenta" rel="noopener noreferrer" target="_blank">Aristotle's categories (the praedicamenta)</a></p>
+      <p><a class="external-link" href="https://en.wikipedia.org/w/index.php?title=Category_(Kant)#The_table_of_judgments" rel="noopener noreferrer" target="_blank">Kant's table of judgments</a></p>
+      <p><a class="external-link" href="https://en.wikipedia.org/w/index.php?title=Category_(Kant)#The_table_of_categories" rel="noopener noreferrer" target="_blank">Kant's table of categories</a></p>
+      <h2>Natural Semantic Metalanguage</h2>
+      <p><a class="external-link" href="https://en.wikipedia.org/wiki/Natural_semantic_metalanguage#Semantic_primes" rel="noopener noreferrer" target="_blank">semantic primes</a></p>
+    </aside>
+    <footer>
+      <small>version {{ version }} · <a href="/">latest version</a> · Copyright © <time datetime="2026">2026 </time>Vernacular Cloud LLC <a href="mailto:victor.badinage@vernacular.cloud">victor.badinage@vernacular.cloud</a></small>
+    </footer>
+  </body>
+</html>

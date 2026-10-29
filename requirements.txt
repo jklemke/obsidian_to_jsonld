@@ -1,4 +1,3 @@
 python-frontmatter
 Jinja2
 beautifulsoup4
-html5lib
