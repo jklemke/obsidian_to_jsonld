@@ -291,7 +291,7 @@ def render_html_aside(sections):
     return "\n".join(html_parts)
 
 def generate_concept_scheme(all_concepts, output_dir, version=VERSION):
-    """Generates the root index.html containing the SKOS ConceptScheme."""
+    """Generates <version>/concept-scheme/index.html containing the SKOS ConceptScheme."""
     print("--- Generating Concept Scheme ---")
     
     # 1. Prepare Data Containers
@@ -480,10 +480,32 @@ def prepare_output_dir(rebuild):
         shutil.rmtree(OUTPUT_DIR)
     return True
 
+def hierarchy_ok():
+    """D-009: the parents' # Narrower lists are the master and # Broader is a
+    generated copy. Stop the build if the vault is out of sync or has loops,
+    so skos:broader and skos:narrower are always consistent when published."""
+    import sync_hierarchy
+    notes, resolve = sync_hierarchy.load(VAULT_DIR)
+    _, _, report = sync_hierarchy.analyse(notes, resolve)
+    blocking = {k: v for k, v in report.items()
+                if v and (k.startswith("Loops") or k.startswith("# Broader out of sync"))}
+    if not blocking:
+        print("🌳 Hierarchy check: in sync")
+        return True
+    print("❌ Hierarchy check failed (D-009):")
+    for title, items in blocking.items():
+        print(f"   {title}: {len(items)}  e.g. {', '.join(items[:5])}")
+    print("   Run  python sync_hierarchy.py  for details, then  --fix  (or --promote --fix).")
+    print("   To build anyway, add --no-check.")
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build the vernacular.cloud site from the Obsidian vault.")
     parser.add_argument("--rebuild", action="store_true",
                         help="delete and regenerate the folder for the configured version")
+    parser.add_argument("--no-check", action="store_true",
+                        help="skip the broader/narrower hierarchy check (sync_hierarchy.py)")
     args = parser.parse_args()
 
     problems = check_paths()
@@ -494,6 +516,8 @@ def main():
         sys.exit(1)
 
     print(f"🔖 Version {VERSION}")
+    if not args.no_check and not hierarchy_ok():
+        sys.exit(1)
     print(f"📂 Scanning files in {SOURCE_DIR}...")
 
     if not prepare_output_dir(args.rebuild):
