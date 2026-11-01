@@ -4,9 +4,16 @@
     <meta charset="UTF-8"/>
     <meta name="ROBOTS" content="ALL">
     <meta name="Copyright" content="Vernacular Cloud LLC">
-    <meta name="description" content="vernacular cloud taxonomy with json-ld"/>
+    <meta name="description" content="{{ description | e }}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    
-    <title>{{ title }} - Vernacular Cloud</title>    
+    <title>{{ title }} - Vernacular Cloud</title>
+    <!-- D-006: the permanent concept IRI is canonical; this page is one version of it -->
+    <link rel="canonical" href="{{ concept_iri }}">
+    <meta property="og:site_name" content="Vernacular Cloud">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ title | e }}">
+    <meta property="og:description" content="{{ description | e }}">
+    <meta property="og:url" content="{{ concept_iri }}">
     <link rel="stylesheet" href="/css/prj/core.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Otomanopee One">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Palanquin Dark">
@@ -34,7 +41,8 @@
 
     <main>
       <h1>concept: {{ title }}</h1>
-      <p>concept-key: <a href="{{ domain }}/{{ version }}/{{ uuid }}/">{{ domain }}/{{ version }}/{{ uuid }}/</a></p>
+      <p>concept: <a href="{{ concept_iri }}">{{ concept_iri }}</a><br>
+        this version: <a href="{{ page_url }}">{{ page_url }}</a></p>
       {{ html_main_content | safe }}
     </main>
 

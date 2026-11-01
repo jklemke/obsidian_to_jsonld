@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!-- {{ marker }}: permanent IRI (D-006) {{ iri }} ; sends visitors to the latest version. Do not edit by hand. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ label }} - Vernacular Cloud</title>
+    <meta name="description" content="{{ description | e }}">
+    <link rel="canonical" href="{{ iri }}">
+    <meta property="og:site_name" content="Vernacular Cloud">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ label | e }}">
+    <meta property="og:description" content="{{ description | e }}">
+    <meta property="og:url" content="{{ iri }}">
+    <meta http-equiv="refresh" content="0; url={{ latest_path }}">
+    <script type="application/ld+json">
+      {{ json_ld | indent(6) | safe }}
+    </script>
+    <script>location.replace("{{ latest_path }}");</script>
+  </head>
+  <body>
+    <p><a href="{{ iri }}">{{ iri }}</a> is the permanent address of <em>{{ label }}</em>.
+      The latest version is <a href="{{ latest_path }}">{{ latest }}</a>.</p>
+    <p>All versions:{% for v in versions %} <a href="/{{ v }}/{{ key }}/">{{ v }}</a>{% endfor %}</p>
+  </body>
+</html>

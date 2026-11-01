@@ -12,8 +12,10 @@ from vault_clean import publishable_sections, placeholder_count, review
 # --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
 from vc_config import (
     VERSION, DOMAIN, VAULT_DIR, SITE_DIR, OUTPUT_DIR, TEMPLATE_DIR,
-    SCHEME_URI, concept_uri, check_paths,
+    SCHEME_IRI, SCHEME_PAGE_URL, JSONLD_CONTEXT, concept_iri, page_url, check_paths,
 )
+DEFAULT_DESCRIPTION = "vernacular cloud taxonomy with json-ld"
+
 
 SOURCE_DIR = VAULT_DIR
 
@@ -180,17 +182,34 @@ def parse_sections(content):
     tasks or template placeholders. A section left empty is skipped."""
     return publishable_sections(content)
 
+def plain_text(lines, limit=300):
+    """One line of plain text from a section, for <meta description> and og:description."""
+    text = " ".join(l.strip().lstrip("-*+ ").strip() for l in lines or [] if l.strip())
+    text = re.sub(r'!\[\[[^\]]*\]\]', '', text)                    # embeds
+    text = re.sub(r'\[\[(?:[^\]|]*\|)?([^\]]*)\]\]', r'\1', text)  # [[x|y]] -> y
+    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)            # [label](url) -> label
+    text = re.sub(r'[*_`]', '', text)
+    text = re.sub(r'\s{2,}', ' ', text).strip()
+    if len(text) > limit:
+        text = text[:limit].rsplit(' ', 1)[0] + " …"
+    return text
+
+
 def generate_skos_json(uuid, title, sections):
-    json_ld = {
-        "@context": {
-            "skos": "http://www.w3.org/2004/02/skos/core#",
-            "dct": "http://purl.org/dc/terms/"
-        },
-        "@id": concept_uri(uuid),
+    """Two nodes (D-006): the concept, under its permanent IRI, and this version's
+    page, which states that it is a version of that concept."""
+    concept = {
+        "@id": concept_iri(uuid),
         "@type": "skos:Concept",
         "skos:prefLabel": title,
-        "skos:inScheme": SCHEME_URI
+        "skos:inScheme": SCHEME_IRI
     }
+    page = {
+        "@id": page_url(uuid),
+        "dct:isVersionOf": concept_iri(uuid),
+        "owl:versionInfo": VERSION
+    }
+    json_ld = {"@context": JSONLD_CONTEXT, "@graph": [concept, page]}
 
     for header, lines in sections.items():
         skos_prop = HEADER_TO_SKOS.get(header)
@@ -202,17 +221,17 @@ def generate_skos_json(uuid, title, sections):
                 link_text = clean_link_text(line).lower()
                 target_uuid = concept_index.get(link_text)
                 if target_uuid:
-                    uris.append(concept_uri(target_uuid))
+                    uris.append(concept_iri(target_uuid))
             if uris:
-                json_ld[skos_prop] = uris if len(uris) > 1 else uris[0]
+                concept[skos_prop] = uris if len(uris) > 1 else uris[0]
 
         elif header == "Alternative Label":
             clean_items = [line.lstrip('- ').strip() for line in lines]
-            json_ld[skos_prop] = clean_items
+            concept[skos_prop] = clean_items
 
         else:
             text_block = " ".join(lines)
-            json_ld[skos_prop] = text_block
+            concept[skos_prop] = text_block
 
     return json_ld
 
@@ -301,14 +320,13 @@ def generate_concept_scheme(all_concepts, output_dir, version=VERSION):
             label = Path(concept['filename']).stem
             
             if uuid:
-                uri = concept_uri(uuid)
+                # JSON-LD names the concept (permanent IRI, D-006) ...
+                jsonld_links.append(concept_iri(uuid))
 
-                # Append to JSON-LD list (Standard SKOS)
-                jsonld_links.append({"@id": uri})
-
-                # Append to HTML list (Rich Data)
+                # ... the HTML links to its page in this version.
                 html_render_list.append({
-                    "url": uri,
+                    "url": page_url(uuid),
+                    "iri": concept_iri(uuid),
                     "name": label,
                     "uuid": uuid
                 })
@@ -318,14 +336,13 @@ def generate_concept_scheme(all_concepts, output_dir, version=VERSION):
 
     # 2. Build the JSON-LD Structure
     scheme_data = {
-        "@context": {
-            "skos": "http://www.w3.org/2004/02/skos/core#",
-            "dc": "http://purl.org/dc/elements/1.1/"
-        },
+        "@context": JSONLD_CONTEXT,
         "@graph": [
             {
-                "@id": SCHEME_URI,
+                "@id": SCHEME_IRI,
                 "@type": "skos:ConceptScheme",
+                "owl:versionIRI": SCHEME_PAGE_URL,
+                "owl:versionInfo": version,
                 "dc:title": "Vernacular Cloud",
                 "dc:creator": "Victor Badinage",
                 "skos:prefLabel": "Vernacular Cloud",
@@ -346,7 +363,9 @@ def generate_concept_scheme(all_concepts, output_dir, version=VERSION):
         output_html = template.render(
             json_ld_script=json_ld_script,
             top_concepts=html_render_list,
-            version=version
+            version=version,
+            scheme_iri=SCHEME_IRI,
+            scheme_page_url=SCHEME_PAGE_URL
         )
         
         # UPDATED: Create 'concept-scheme' directory
@@ -432,7 +451,10 @@ def pass_two_build_site_and_collect():
                 json_ld=json.dumps(skos_data, indent=2),
                 uuid=uuid,
                 version=VERSION,
-                domain=DOMAIN
+                domain=DOMAIN,
+                concept_iri=concept_iri(uuid),
+                page_url=page_url(uuid),
+                description=plain_text(sections.get("Definition")) or DEFAULT_DESCRIPTION
             )
             
             final_html = prettify_html(raw_html)

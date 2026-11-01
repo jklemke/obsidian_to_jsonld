@@ -31,13 +31,49 @@ TEMPLATE_DIR = BASE_DIR / "templates"
 PORT = int(_cfg.get("port", 8899))
 
 VERSION_URL = f"{DOMAIN}/{VERSION}"
-SCHEME_URI = f"{VERSION_URL}/concept-scheme/"
-ROOT_CONCEPT_URI = f"{VERSION_URL}/{_cfg['root_concept_key']}/"
+
+# D-006: two kinds of address.
+#   IRI  = the concept itself, permanent and version-independent:  https://vernacular.cloud/<key>/
+#   page = what the concept said in one release, frozen (D-007):     https://vernacular.cloud/<version>/<key>/
+# JSON-LD @id and SKOS links use IRIs; HTML navigation inside a version uses pages.
+KEY_PATTERN = r"[A-Za-z][0-9A-Za-z]{23}"   # key-map-hash: letter + base62, 24 chars
+VERSION_PATTERN = r"\d+\.\d+\.\d+"
+
+ROOT_CONCEPT_KEY = _cfg["root_concept_key"]
+SCHEME_IRI = f"{DOMAIN}/concept-scheme/"
+SCHEME_PAGE_URL = f"{VERSION_URL}/concept-scheme/"
 
 
-def concept_uri(key):
-    """Absolute permalink for a concept in the current version."""
-    return f"{VERSION_URL}/{key}/"
+def concept_iri(key):
+    """Permanent, version-independent IRI of a concept (D-006)."""
+    return f"{DOMAIN}/{key}/"
+
+
+def page_url(key, version=VERSION):
+    """Frozen page for a concept in one version (default: the version being built)."""
+    return f"{DOMAIN}/{version}/{key}/"
+
+
+ROOT_CONCEPT_IRI = concept_iri(ROOT_CONCEPT_KEY)
+
+# One JSON-LD @context for every generated page. The "@type": "@id" entries say
+# that these properties hold links (IRIs), not text; without them a plain string
+# such as "skos:broader": "https://..." is read as a text value.
+_LINK = {"@type": "@id"}
+JSONLD_CONTEXT = {
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "dct": "http://purl.org/dc/terms/",
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "skos:broader": _LINK,
+    "skos:narrower": _LINK,
+    "skos:related": _LINK,
+    "skos:inScheme": _LINK,
+    "skos:hasTopConcept": _LINK,
+    "dct:isVersionOf": _LINK,
+    "dct:hasVersion": _LINK,
+    "owl:versionIRI": _LINK,
+}
 
 
 def check_paths():
