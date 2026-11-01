@@ -8,8 +8,8 @@ Steps:
   1. Refuse if the version in config.toml is already published (committed in the
      site repo). Published versions are frozen (D-007): bump the version first.
   2. obsidian_to_jsonld.py --rebuild   (includes the D-009 hierarchy check)
-  3. generate_skos_for_index.py --no-root   (the root redirect and About page are
-     left alone, so the site repo only changes inside the unpublished version folder)
+  3. generate_skos_for_index.py --no-root   (the site-level pages and permanent IRI
+     pages are left alone, so the site repo only changes inside the unpublished version folder)
   4. Serve on localhost and open the browser. If a server is already running on the
      port, it is reused: keep one terminal serving and re-run preview.py after each edit.
 

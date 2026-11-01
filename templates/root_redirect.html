@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<!-- {{ marker }}: sends visitors to the latest version. Do not edit by hand. -->
+<!-- {{ marker }}: redirect to {{ target }}. Do not edit by hand. -->
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Vernacular Cloud</title>
-    <meta http-equiv="refresh" content="0; url=/{{ version }}/">
-    <link rel="canonical" href="{{ domain }}/{{ version }}/">
-    <script>location.replace("/{{ version }}/");</script>
+    <title>{{ title }} - Vernacular Cloud</title>
+    <meta http-equiv="refresh" content="0; url={{ target }}">
+    <link rel="canonical" href="{{ domain }}{{ target }}">
+    <script>location.replace("{{ target }}");</script>
   </head>
   <body>
-    <p>The latest version of Vernacular Cloud is <a href="/{{ version }}/">{{ version }}</a>.</p>
+    <p>{{ title }}: <a href="{{ target }}">{{ domain }}{{ target }}</a></p>
   </body>
 </html>

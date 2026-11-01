@@ -6,8 +6,12 @@ version = "0.0.4"
 
 domain = "https://vernacular.cloud"
 
-# Concept used as skos:broader for every concept listed in the root index.html
+# Concept used as skos:broader for every concept listed in the nomenclature index
+# (prefLabel "Badinagean Nomenclature")
 root_concept_key = "nU2JNEcOO9ZHxSlpZMwbCgOG"
+
+# skos:prefLabel / dc:title of the concept scheme
+scheme_label = "Badinagean Nomenclature"
 
 # Paths may be absolute, or relative to the folder this file is in.
 # Single quotes = TOML literal strings, so Windows backslashes need no escaping.

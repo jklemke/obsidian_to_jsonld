@@ -33,13 +33,13 @@
     <meta content="Vernacular Cloud LLC" name="Copyright">
     <meta content="vernacular cloud taxonomy with json-ld" name="description">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>Vernacular Cloud</title>
-    <link rel="canonical" href="{{ domain }}/">
+    <title>Badinagean Nomenclature - Vernacular Cloud</title>
+    <link rel="canonical" href="{{ domain }}/nomenclature/">
     <meta property="og:site_name" content="Vernacular Cloud">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Vernacular Cloud: the Badinagean taxonomy">
+    <meta property="og:title" content="The Badinagean Nomenclature">
     <meta property="og:description" content="The philosophical nomenclature of Victor Badinage, published as a SKOS concept scheme in JSON-LD.">
-    <meta property="og:url" content="{{ domain }}/">
+    <meta property="og:url" content="{{ domain }}/nomenclature/">
     <link href="/css/prj/core.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Otomanopee One" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Palanquin Dark" rel="stylesheet">
@@ -53,16 +53,16 @@
   </head>
   <body>
     <header>
-      <h1>Vernacular Cloud</h1><nav>
+      <h1><a href="/">Vernacular Cloud</a></h1><nav>
       <ul class="navlist">
-        <li><a href="/{{ version }}/">Home</a></li>
-        <li><a href="/about/">About</a></li>
+        <li><a href="/{{ version }}/">Nomenclature</a></li>
+        <li><a href="/nomenclature/about/">About</a></li>
       </ul></nav>
     </header>
     <main>
-      <h1>The Badinagean taxonomy</h1>
-      <p>Vernacular Cloud is an effort to envangelize the philosophical nomenclature of Victor Badinage. Badinage's thesis is that a new systematic philosophy suitable for the current epoch ought to simultaneously walk two paths: One route pursues hermeneutical and conceptual mastery by human subjects; A second route promulgates the nomenclature using the technology of controlled vocabularies. A systematic philosophy so conceived would thus combine the traditional topics of grammar, dialectic, and rhetoric with the semantic technologies of taxonomy, ontology, knowledge graphs, social media, and so-called AI. </p>
-      <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format. Its permanent IRI has the form https://vernacular.cloud/UUID/ and leads to the latest version; each version is kept at https://vernacular.cloud/version/UUID/.</p>
+      <h1>The Badinagean Nomenclature</h1>
+      <p>This is an effort to evangelize the philosophical nomenclature of Victor Badinage.</p>
+      <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format. Its permanent IRI has the form https://vernacular.cloud/{UUID}/ and leads to the latest version; each version is kept at https://vernacular.cloud/{version}/{UUID}/.</p>
       <section>
         {{ section("w62qBcZ3ILeFl1w6CqqDJHiU", "The Unsayables") }}
       </section>
@@ -128,7 +128,7 @@
       <p><a class="external-link" href="https://en.wikipedia.org/wiki/Natural_semantic_metalanguage#Semantic_primes" rel="noopener noreferrer" target="_blank">semantic primes</a></p>
     </aside>
     <footer>
-      <small>version {{ version }} · <a href="/">latest version</a> · Copyright © <time datetime="2026">2026 </time>Vernacular Cloud LLC <a href="mailto:victor.badinage@vernacular.cloud">victor.badinage@vernacular.cloud</a></small>
+      <small>version {{ version }} · <a href="/nomenclature/">latest version</a> · Copyright © <time datetime="2026">2026 </time>Vernacular Cloud LLC <a href="mailto:victor.badinage@vernacular.cloud">victor.badinage@vernacular.cloud</a></small>
     </footer>
   </body>
 </html>

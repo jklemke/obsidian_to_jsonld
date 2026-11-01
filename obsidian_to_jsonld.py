@@ -12,7 +12,7 @@ from vault_clean import publishable_sections, placeholder_count, review
 # --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
 from vc_config import (
     VERSION, DOMAIN, VAULT_DIR, SITE_DIR, OUTPUT_DIR, TEMPLATE_DIR,
-    SCHEME_IRI, SCHEME_PAGE_URL, JSONLD_CONTEXT, concept_iri, page_url, check_paths,
+    SCHEME_IRI, SCHEME_PAGE_URL, SCHEME_LABEL, JSONLD_CONTEXT, concept_iri, page_url, check_paths,
 )
 DEFAULT_DESCRIPTION = "vernacular cloud taxonomy with json-ld"
 
@@ -343,9 +343,9 @@ def generate_concept_scheme(all_concepts, output_dir, version=VERSION):
                 "@type": "skos:ConceptScheme",
                 "owl:versionIRI": SCHEME_PAGE_URL,
                 "owl:versionInfo": version,
-                "dc:title": "Vernacular Cloud",
+                "dc:title": SCHEME_LABEL,
                 "dc:creator": "Victor Badinage",
-                "skos:prefLabel": "Vernacular Cloud",
+                "skos:prefLabel": SCHEME_LABEL,
                 "skos:definition": "A systematic philosophy combining grammar, dialectic, and rhetoric with the semantic technology of taxonomies, ontologies, knowledge graphs, social media, and so-called AI.",
                 "skos:hasTopConcept": jsonld_links
             }

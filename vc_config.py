@@ -40,6 +40,7 @@ KEY_PATTERN = r"[A-Za-z][0-9A-Za-z]{23}"   # key-map-hash: letter + base62, 24 c
 VERSION_PATTERN = r"\d+\.\d+\.\d+"
 
 ROOT_CONCEPT_KEY = _cfg["root_concept_key"]
+SCHEME_LABEL = _cfg.get("scheme_label", "Badinagean Nomenclature")
 SCHEME_IRI = f"{DOMAIN}/concept-scheme/"
 SCHEME_PAGE_URL = f"{VERSION_URL}/concept-scheme/"
 

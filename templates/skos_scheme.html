@@ -6,11 +6,11 @@
     <meta content="Vernacular Cloud LLC" name="Copyright"></meta>
     <meta content="vernacular cloud taxonomy with json-ld" name="description"></meta>
     <meta content="width=device-width, initial-scale=1" name="viewport"></meta>
-    <title>Vernacular Cloud - Concept Scheme</title>
+    <title>Concept Scheme - Vernacular Cloud</title>
     <link rel="canonical" href="{{ scheme_iri }}">
     <meta property="og:site_name" content="Vernacular Cloud">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="The Vernacular Cloud SKOS concept scheme">
+    <meta property="og:title" content="The Badinagean Nomenclature: SKOS concept scheme">
     <meta property="og:description" content="The top concepts of the Badinagean nomenclature, published as SKOS in JSON-LD.">
     <meta property="og:url" content="{{ scheme_iri }}">
     <link href="/css/prj/core.css" rel="stylesheet"></link>
@@ -28,16 +28,16 @@
 <body>
 
     <header>
-      <h1>Vernacular Cloud</h1><nav>
+      <h1><a href="/">Vernacular Cloud</a></h1><nav>
       <ul class="navlist">
-        <li><a href="/{{ version }}/">Home</a></li>
-        <li><a href="/about/">About</a></li>
+        <li><a href="/{{ version }}/">Nomenclature</a></li>
+        <li><a href="/nomenclature/about/">About</a></li>
       </ul></nav>
     </header>
 
     <main>
 
-      <h1>The Vernacular Cloud SKOS concept scheme</h1>
+      <h1>The Badinagean Nomenclature: SKOS concept scheme</h1>
       <p>These are the top concepts of the skos:ConceptScheme. They constitute the metaphysical entry points into the system.</p>
       <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format. Its permanent IRI has the form https://vernacular.cloud/UUID/ and leads to the latest version; each version is kept at https://vernacular.cloud/version/UUID/.</p>
       {% for concept in top_concepts %}

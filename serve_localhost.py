@@ -51,8 +51,8 @@ def serve():
 
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print(f"\n--- Vernacular Cloud Dev Server ---")
-        print(f"    Home:     http://localhost:{PORT}/   (redirects to /{VERSION}/)")
-        print(f"    Version:  http://localhost:{PORT}/{VERSION}/")
+        print(f"    Home:     http://localhost:{PORT}/   (Vernacular Cloud LLC; after a full generate_skos_for_index.py)")
+        print(f"    Version:  http://localhost:{PORT}/{VERSION}/   (nomenclature index)")
         print(f"    Scheme:   http://localhost:{PORT}/{VERSION}/concept-scheme/")
         print(f"    Root:     {SITE_DIR}")
         print("\n    Press Ctrl+C to stop...")
