@@ -42,8 +42,8 @@
 
     <main>
       <h1>concept: {{ title }}</h1>
-      <p>concept: <a href="{{ concept_iri }}">{{ concept_iri }}</a><br>
-        this version: <a href="{{ page_url }}">{{ page_url }}</a></p>
+      <p>concept: <a href="/{{ uuid }}/">{{ concept_iri }}</a><br>
+        this version: <a href="/{{ version }}/{{ uuid }}/">{{ page_url }}</a></p>
       {{ html_main_content | safe }}
     </main>
 
