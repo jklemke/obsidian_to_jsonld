@@ -47,6 +47,18 @@ def clean_link_text(text):
     match = re.search(r'\[\[(.*?)\]\]', text)
     return match.group(1) if match else text.strip()
 
+# --- HELPER: Inline Markdown (2026-11-15) ---
+def format_inline(text):
+    """Escape stray & and <, then render `code`, **bold** and *italic*.
+    Underscore emphasis is left alone (URLs and file names use underscores).
+    Intentional inline HTML tags (<br>, <sup>) and entities pass through."""
+    text = re.sub(r'&(?![A-Za-z#][A-Za-z0-9]*;)', '&amp;', text)
+    text = re.sub(r'<(?![A-Za-z/!])', '&lt;', text)
+    text = re.sub(r'`([^`]+)`', r'<code>\1</code>', text)
+    text = re.sub(r'\*\*(?=\S)(.+?)(?<=\S)\*\*', r'<strong>\1</strong>', text)
+    text = re.sub(r'(?<![*\w])\*(?=[^\s*])(.+?)(?<=[^\s*])\*(?![*\w])', r'<em>\1</em>', text)
+    return text
+
 # --- HELPER: Centralized Link Processing ---
 def process_text_links(text):
     """
@@ -81,7 +93,7 @@ def process_text_links(text):
         return f'<a href="{url}" class="external-link" target="_blank" rel="noopener noreferrer">{label}</a>'
 
     # Regex excludes images starting with !
-    text = re.sub(r'(?<!\!)\[([^\]]+)\]\(([^)]+)\)', md_link_sub, text)
+    text = re.sub(r'(?<!\!)\[([^\]]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)', md_link_sub, text)
 
     return text 
 
@@ -238,40 +250,54 @@ def generate_skos_json(uuid, title, sections):
 def render_section_to_html(lines):
     html_parts = []
     in_list = False
+    in_quote = False
     bullet_pattern = re.compile(r'^[-*+]\s+(.*)')
+
+    def inline(s):
+        return process_text_links(format_inline(s))
+
+    def close_open():
+        nonlocal in_list, in_quote
+        if in_list:
+            html_parts.append("</ul>")
+            in_list = False
+        if in_quote:
+            html_parts.append("</blockquote>")
+            in_quote = False
 
     for line in lines:
         stripped = line.strip()
         if not stripped: continue
-        
+
         bullet_match = bullet_pattern.match(stripped)
-        
-        if bullet_match:
+
+        if stripped.startswith('>'):
+            if in_list:
+                html_parts.append("</ul>")
+                in_list = False
+            if not in_quote:
+                html_parts.append("<blockquote>")
+                in_quote = True
+            html_parts.append(f"<p>{inline(stripped.lstrip('>').strip())}</p>")
+
+        elif bullet_match:
+            if in_quote:
+                html_parts.append("</blockquote>")
+                in_quote = False
             if not in_list:
                 html_parts.append("<ul>")
                 in_list = True
-            raw_content = bullet_match.group(1)
-            content = process_text_links(raw_content)
-            html_parts.append(f"<li>{content}</li>")
+            html_parts.append(f"<li>{inline(bullet_match.group(1))}</li>")
 
         elif stripped.startswith('##'):
-            if in_list:
-                html_parts.append("</ul>")
-                in_list = False
-            content = stripped.lstrip('#').strip()
-            content = process_text_links(content)
-            html_parts.append(f"<h3>{content}</h3>")
+            close_open()
+            html_parts.append(f"<h3>{inline(stripped.lstrip('#').strip())}</h3>")
 
         else:
-            if in_list:
-                html_parts.append("</ul>")
-                in_list = False
-            content = process_text_links(stripped)
-            html_parts.append(f"<p>{content}</p>")
-            
-    if in_list:
-        html_parts.append("</ul>")
-        
+            close_open()
+            html_parts.append(f"<p>{inline(stripped)}</p>")
+
+    close_open()
     return "\n".join(html_parts)    
     
 def render_html_main(sections):
