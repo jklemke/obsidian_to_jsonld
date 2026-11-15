@@ -26,6 +26,12 @@ class SiteHandler(http.server.SimpleHTTPRequestHandler):
     # "preconnect"). Without a timeout the handler waits on it indefinitely.
     timeout = 5
 
+    def end_headers(self):
+        # Always revalidate with the server, so a browser never shows a stale page
+        # (e.g. an old /nomenclature/ redirect) during preview (2026-11-15).
+        self.send_header("Cache-Control", "no-cache")
+        super().end_headers()
+
     def do_GET(self):
         if self.path == "/latest" or self.path.startswith("/latest/"):
             rest = self.path[len("/latest"):].lstrip("/")

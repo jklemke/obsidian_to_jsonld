@@ -50,14 +50,63 @@ def clean_link_text(text):
 # --- HELPER: Inline Markdown (2026-11-15) ---
 def format_inline(text):
     """Escape stray & and <, then render `code`, **bold** and *italic*.
-    Underscore emphasis is left alone (URLs and file names use underscores).
+    _italic_ is rendered only at word boundaries (URLs and file names use underscores).
     Intentional inline HTML tags (<br>, <sup>) and entities pass through."""
     text = re.sub(r'&(?![A-Za-z#][A-Za-z0-9]*;)', '&amp;', text)
     text = re.sub(r'<(?![A-Za-z/!])', '&lt;', text)
     text = re.sub(r'`([^`]+)`', r'<code>\1</code>', text)
     text = re.sub(r'\*\*(?=\S)(.+?)(?<=\S)\*\*', r'<strong>\1</strong>', text)
     text = re.sub(r'(?<![*\w])\*(?=[^\s*])(.+?)(?<=[^\s*])\*(?![*\w])', r'<em>\1</em>', text)
+    # _italic_ only at word boundaries, so file_name_here and URLs are untouched (2026-11-15)
+    text = re.sub(r'(?<![\w/\\])_(?=[^\s_])(.+?)(?<=[^\s_])_(?![\w/])', r'<em>\1</em>', text)
     return text
+
+# --- HELPER: Embeds ![[Note#^blockid]] (2026-11-15) ---
+EMBED_RE = re.compile(r'!\[\[([^\]|#]+)(#\^?[^\]|]*)?(?:\|[^\]]*)?\]\]')
+_note_paths = {}
+embed_warnings = []
+credit_warnings = []   # a quote followed by a short paragraph: a credit outside the quote?
+# Embeds from these notes are attributed under the quotation; all others are unmarked (JWK 2026-11-15)
+QUOTE_SOURCES = {"Victor Badinage Quotes by Theme": "Victor Badinage"}
+
+def find_vault_note(name):
+    """Path of the note called <name>.md anywhere in the vault (shallowest first), or None."""
+    key = name.strip()
+    if key not in _note_paths:
+        hits = [p for p in Path(VAULT_DIR).rglob(f"{key}.md") if ".obsidian" not in p.parts and ".trash" not in p.parts]
+        hits.sort(key=lambda p: (len(p.parts), str(p)))
+        _note_paths[key] = hits[0] if hits else None
+    return _note_paths[key]
+
+def resolve_embed(note, ref):
+    """Text of the block ^id in <note>, without its id and list marker; None if not found."""
+    if not ref or not ref.startswith("#^"):
+        return None  # heading and whole-note embeds are not inlined
+    block = ref[2:].strip()
+    path = find_vault_note(note)
+    if not path:
+        return None
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for i, line in enumerate(lines):
+        if line.strip() == f"^{block}":
+            # id on its own line labels the block just above it (Obsidian)
+            j = i - 1
+            while j >= 0 and not lines[j].strip():
+                j -= 1
+            para = []
+            while j >= 0 and lines[j].strip():
+                para.insert(0, lines[j].strip())
+                if re.match(r"^[-*+]\s+", lines[j].strip()):
+                    break  # a list item stands alone
+                j -= 1
+            text = " ".join(para)
+        elif re.search(rf"\s\^{re.escape(block)}\s*$", line):
+            text = re.sub(rf"\s\^{re.escape(block)}\s*$", "", line).strip()
+        else:
+            continue
+        text = re.sub(r"^(?:[-*+]\s+|>\s*)", "", text).strip()
+        return text or None
+    return None
 
 # --- HELPER: Centralized Link Processing ---
 def process_text_links(text):
@@ -269,16 +318,44 @@ def render_section_to_html(lines):
         stripped = line.strip()
         if not stripped: continue
 
+        if '![[' in stripped:
+            quotes = []
+            for m in EMBED_RE.finditer(stripped):
+                q = resolve_embed(m.group(1), m.group(2))
+                if q:
+                    quotes.append((q, QUOTE_SOURCES.get(m.group(1).strip())))
+                else:
+                    embed_warnings.append(m.group(0))
+            rest = EMBED_RE.sub('', stripped).strip()
+            if rest:
+                close_open()
+                html_parts.append(render_section_to_html([rest]))
+            for q, author in quotes:
+                close_open()
+                credit = f"\n<footer><cite>{author}</cite></footer>" if author else ""
+                html_parts.append(f"<blockquote>\n<p>{inline(q)}</p>{credit}\n</blockquote>")
+            continue
+
         bullet_match = bullet_pattern.match(stripped)
 
         if stripped.startswith('>'):
             if in_list:
                 html_parts.append("</ul>")
                 in_list = False
+            body = stripped.lstrip('>').strip()
+            if not body:
+                continue  # a bare '>' separates lines inside the quote
             if not in_quote:
                 html_parts.append("<blockquote>")
                 in_quote = True
-            html_parts.append(f"<p>{inline(stripped.lstrip('>').strip())}</p>")
+            credit = re.match(r'^(?:\u2014|--)\s*(.+)$', body)
+            if credit:
+                # "> — Author, *Work* locator": the dash is supplied by CSS (2026-11-15)
+                html_parts.append(f"<footer><cite>{inline(credit.group(1))}</cite></footer>")
+                html_parts.append("</blockquote>")
+                in_quote = False
+            else:
+                html_parts.append(f"<p>{inline(body)}</p>")
 
         elif bullet_match:
             if in_quote:
@@ -294,6 +371,8 @@ def render_section_to_html(lines):
             html_parts.append(f"<h3>{inline(stripped.lstrip('#').strip())}</h3>")
 
         else:
+            if (in_quote or (html_parts and html_parts[-1] == "</blockquote>")) and len(stripped) < 120:
+                credit_warnings.append(stripped)
             close_open()
             html_parts.append(f"<p>{inline(stripped)}</p>")
 
@@ -585,6 +664,12 @@ def main():
         print(f"⚠️ {len(ruled)} notes have text after a --- inside a published section (it IS published): "
               + ", ".join(ruled[:8]) + (" …" if len(ruled) > 8 else ""))
         print("   Replace the --- with  # Work in Progress  if that text is private.")
+    if credit_warnings:
+        print(f"ℹ️ {len(credit_warnings)} quotes are followed by a short line that may be a credit outside the quote "
+              "(write it inside as  > — Author, *Work* locator): " + " | ".join(credit_warnings[:6]))
+    if embed_warnings:
+        print(f"⚠️ {len(embed_warnings)} embeds could not be inlined and were left out: "
+              + ", ".join(sorted(set(embed_warnings))[:8]))
 
 if __name__ == "__main__":
     main()
