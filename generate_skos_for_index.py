@@ -38,7 +38,7 @@ from urllib.parse import urljoin
 import frontmatter
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
-from vault_clean import clean_lines, before_wip
+from vault_clean import clean_lines, before_wip, skos_text
 
 # --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
 from vc_config import (
@@ -72,11 +72,9 @@ def normalize_text(text_lines):
     """Join definition lines into one plain-text string for skos:definition."""
     if not text_lines:
         return None
-    text = " ".join(line.strip() for line in text_lines if line.strip())
-    text = re.sub(r'!\[\[[^\]]*\]\]', '', text)                    # drop embeds  ![[note#^block]]
-    text = re.sub(r'\[\[(?:[^\]|]*\|)?([^\]]*)\]\]', r'\1', text)  # [[target|alias]] -> alias, [[x]] -> x
-    text = re.sub(r'\s{2,}', ' ', text).strip()
-    return text or None
+    # the same plain-text rules as the concept pages (vault_clean.skos_text, 2026-11-16);
+    # embeds are dropped here: the index has no quotation resolver
+    return skos_text(text_lines)
 
 
 def parse_definition_from_md(content):
@@ -237,8 +235,10 @@ def page_facts(html_file):
     """(label, description) read back from a generated concept page."""
     text = html_file.read_text(encoding="utf-8", errors="replace")
     t = re.search(r"<title>(.*?) - Vernacular Cloud</title>", text, re.S)
-    d = re.search(r'<meta name="description" content="(.*?)"', text, re.S)
-    desc = BeautifulSoup(d.group(1), "html.parser").get_text() if d else None
+    # parse the tag rather than regex the attribute: pages from 0.0.7 and earlier
+    # have unescaped quotes inside content="..."
+    m = BeautifulSoup(text, "html.parser").find("meta", attrs={"name": "description"})
+    desc = m.get("content") if m else None
     if desc == "vernacular cloud taxonomy with json-ld":   # generic text on pages before 0.0.4
         desc = None
     return (t.group(1).strip() if t else None, desc)

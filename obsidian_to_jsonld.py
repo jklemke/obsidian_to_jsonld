@@ -7,7 +7,8 @@ import frontmatter
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from html.parser import HTMLParser
-from vault_clean import publishable_sections, placeholder_count, review
+from html import escape as html_escape
+from vault_clean import publishable_sections, placeholder_count, review, skos_text
 
 # --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
 from vc_config import (
@@ -146,6 +147,12 @@ def process_text_links(text):
 
     return text 
 
+def attr_string(attrs):
+    """Attributes for a start tag. HTMLParser hands back unescaped values, so
+    escape them again; otherwise a quote in a meta description ends the attribute."""
+    return ''.join(f' {k}="{html_escape(v, quote=True)}"' if v else f' {k}' for k, v in attrs)
+
+
 class SmartHTMLFormatter(HTMLParser):
     def __init__(self, indent_width=2):
         super().__init__()
@@ -176,7 +183,7 @@ class SmartHTMLFormatter(HTMLParser):
         if tag in self.structural_tags:
             self._add_newline_if_needed()
             self._indent()
-            attr_str = ''.join(f' {k}="{v}"' if v else f' {k}' for k, v in attrs)
+            attr_str = attr_string(attrs)
             self.formatted.append(f"<{tag}{attr_str}>")
             if tag not in self.void_tags:
                 self.level += 1
@@ -185,12 +192,12 @@ class SmartHTMLFormatter(HTMLParser):
         elif tag in self.content_tags:
             self._add_newline_if_needed()
             self._indent()
-            attr_str = ''.join(f' {k}="{v}"' if v else f' {k}' for k, v in attrs)
+            attr_str = attr_string(attrs)
             self.formatted.append(f"<{tag}{attr_str}>")
             self.just_opened_block = True
             
         else:
-            attr_str = ''.join(f' {k}="{v}"' if v else f' {k}' for k, v in attrs)
+            attr_str = attr_string(attrs)
             self.formatted.append(f"<{tag}{attr_str}>")
             self.just_opened_block = False
 
@@ -256,6 +263,17 @@ def plain_text(lines, limit=300):
     return text
 
 
+def jsonld_embed(note, ref):
+    """An embedded block as plain text for JSON-LD, with the same credit the page
+    shows for quotations from QUOTE_SOURCES (2026-11-16)."""
+    text = resolve_embed(note, ref)
+    if not text:
+        return None
+    text = skos_text([text]) or ""
+    source = QUOTE_SOURCES.get(note.strip())
+    return f"{text} — {source}" if source and text else (text or None)
+
+
 def generate_skos_json(uuid, title, sections):
     """Two nodes (D-006): the concept, under its permanent IRI, and this version's
     page, which states that it is a version of that concept."""
@@ -287,12 +305,15 @@ def generate_skos_json(uuid, title, sections):
                 concept[skos_prop] = uris if len(uris) > 1 else uris[0]
 
         elif header == "Alternative Label":
-            clean_items = [line.lstrip('- ').strip() for line in lines]
-            concept[skos_prop] = clean_items
+            clean_items = [t for t in (skos_text([line]) for line in lines) if t]
+            if clean_items:
+                concept[skos_prop] = clean_items
 
         else:
-            text_block = " ".join(lines)
-            concept[skos_prop] = text_block
+            # plain text, not Markdown: quotes resolved and credited, markers and links stripped (2026-11-16)
+            text_block = skos_text(lines, embed=jsonld_embed)
+            if text_block:
+                concept[skos_prop] = text_block
 
     return json_ld
 

@@ -69,6 +69,41 @@ def clean_lines(lines):
     return out
 
 
+# --- Plain text for the SKOS text fields in JSON-LD (2026-11-16) ---
+# skos:definition, skos:example, skos:scopeNote and the other notes are plain
+# literals: no Markdown. Each published line (a paragraph, a list item, or a
+# quotation line) becomes one line of the literal, joined by newlines.
+EMBED = re.compile(r'!\[\[([^\]|#]+)(#\^?[^\]|]*)?(?:\|[^\]]*)?\]\]')
+WIKI = re.compile(r'\[\[(?:[^\]|]*\|)?([^\]]*)\]\]')
+MD_LINK = re.compile(r'\[([^\]]+)\]\((https?://[^)\s]+)\)')
+
+
+def skos_text(lines, embed=None):
+    """One plain-text literal from published lines. `embed(note, ref)` returns
+    the text an embed ![[note#^id]] stands for (None drops it); without it,
+    embeds are dropped. Quotation markers (>), list bullets, wiki-link
+    brackets, and Markdown emphasis are removed; [label](url) keeps both,
+    as "label (url)". Returns None if nothing is left."""
+    out = []
+    for raw in lines or []:
+        line = raw.strip()
+        if not line:
+            continue
+        line = re.sub(r"^>\s?", "", line)                 # quotation line
+        line = re.sub(r"^[-*+]\s+", "", line)             # list bullet
+        line = EMBED.sub(lambda m: (embed(m.group(1), m.group(2)) if embed else None) or "", line)
+        line = WIKI.sub(r"\1", line)                      # [[target|alias]] -> alias
+        line = MD_LINK.sub(r"\1 (\2)", line)             # [label](url) -> label (url)
+        line = re.sub(r"`([^`]*)`", r"\1", line)
+        line = re.sub(r"\*\*(?=\S)(.+?)(?<=\S)\*\*", r"\1", line)
+        line = re.sub(r"(?<![*\w])\*(?=[^\s*])(.+?)(?<=[^\s*])\*(?![*\w])", r"\1", line)
+        line = re.sub(r"(?<![\w/\\])_(?=[^\s_])(.+?)(?<=[^\s_])_(?![\w/])", r"\1", line)
+        line = re.sub(r"\s{2,}", " ", line).strip()
+        if line:
+            out.append(line)
+    return "\n".join(out) or None
+
+
 def placeholder_count(text):
     """How many template placeholder lines a note still contains."""
     return sum(1 for line in text.split("\n") if line.strip() in PLACEHOLDERS)

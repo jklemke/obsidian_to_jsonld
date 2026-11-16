@@ -10,7 +10,8 @@
 {#- One index section: the heading's display text stays here (D-003);
     data-pref-label and the child links come from the vault, in the order of the
     parent's # Narrower list (D-009). spaced=true adds a blank line after each
-    child (used by The Magisteria). See generate_skos_for_index.py. -#}
+    child (used by The Magisteria, so each lines up with its two Categories; the
+    classes spaced-head and spaced-gap draw the leader and bracket, list-para-nav.css). See generate_skos_for_index.py. -#}
 {% macro section(key, display, spaced=false) -%}
 {%- set c = concepts.get(key) -%}
 {%- if not c %}<!-- unknown concept key {{ key }} -->{% else -%}
@@ -18,9 +19,9 @@
           <h1><a data-pref-label="{{ c.label }}" href="{{ key }}/">{{ display }}</a></h1>
         </header>
 {%- for k in c.narrower %}
-        <p><a class="internal-link" href="{{ k.key }}/">{{ k.label }}</a></p>
+        <p{% if spaced %} class="spaced-head"{% endif %}><a class="internal-link" href="{{ k.key }}/">{{ k.label }}</a></p>
 {%- if spaced %}
-        <p> </p>
+        <p class="spaced-gap"> </p>
 {%- endif %}
 {%- endfor %}
 {%- endif %}
