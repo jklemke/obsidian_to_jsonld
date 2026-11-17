@@ -2,7 +2,7 @@
 # This is the only file you should need to edit between builds.
 
 # Release being built. Each release goes to its own folder:  <site_dir>/<version>/
-version = "0.0.7"
+version = "0.0.8"
 
 domain = "https://vernacular.cloud"
 
@@ -15,7 +15,10 @@ scheme_label = "Badinagean Nomenclature"
 
 # Paths may be absolute, or relative to the folder this file is in.
 # Single quotes = TOML literal strings, so Windows backslashes need no escaping.
-vault_dir = 'C:\Users\joekl\Dropbox\Knowledge Mgt\Personal Knowledge Mgt\00 to 09 Metadata\09 Archive\Obsidian Markdown\VernacularCloud'
+# vault_dir: the whole Obsidian vault, searched for embedded notes (quotes and the like).
+# concept_dir: the folder whose top-level notes are the concepts (since 0.0.8).
+vault_dir   = 'C:\Users\joekl\Dropbox\Knowledge Mgt\Personal Knowledge Mgt\00 to 09 Metadata\09 Archive\Obsidian Markdown\The Big Picture'
+concept_dir = 'C:\Users\joekl\Dropbox\Knowledge Mgt\Personal Knowledge Mgt\00 to 09 Metadata\09 Archive\Obsidian Markdown\The Big Picture\40 to 49 Career and Ambition\42 Products\42.01 Badinagean Nomenclature\concept notes'
 site_dir  = '../vernacular-cloud-003'
 
 # Local review server (serve_localhost.py)

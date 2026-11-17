@@ -42,7 +42,7 @@ from vault_clean import clean_lines, before_wip, skos_text
 
 # --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
 from vc_config import (
-    DOMAIN, VERSION, VAULT_DIR, SITE_DIR, OUTPUT_DIR, TEMPLATE_DIR,
+    DOMAIN, VERSION, CONCEPT_DIR, SITE_DIR, OUTPUT_DIR, TEMPLATE_DIR,
     VERSION_URL, SCHEME_IRI, SCHEME_PAGE_URL, SCHEME_LABEL, ROOT_CONCEPT_IRI,
     KEY_PATTERN, VERSION_PATTERN, JSONLD_CONTEXT, concept_iri, page_url,
 )
@@ -357,8 +357,8 @@ def main():
 
     template_text = (TEMPLATE_DIR / INDEX_TEMPLATE).read_text(encoding="utf-8")
 
-    definition_map = build_definition_map(VAULT_DIR)
-    concepts, skipped = build_concepts(VAULT_DIR)
+    definition_map = build_definition_map(CONCEPT_DIR)
+    concepts, skipped = build_concepts(CONCEPT_DIR)
     keys = check_section_keys(template_text, concepts)
     used = {k for k in keys if k in concepts}
     for line in skipped:

@@ -161,14 +161,14 @@ def main():
     ap.add_argument("--promote", action="store_true", help="append Broader-only links to parents' # Narrower")
     ap.add_argument("--skip-parent", action="append", default=[], metavar="NAME",
                     help="do not promote into this parent (repeatable)")
-    ap.add_argument("--vault", help="vault folder (default: vault_dir from config.toml)")
+    ap.add_argument("--vault", help="concept folder (default: concept_dir from config.toml)")
     args = ap.parse_args()
 
     if args.vault:
         vault = Path(args.vault)
     else:
-        from vc_config import VAULT_DIR
-        vault = VAULT_DIR
+        from vc_config import CONCEPT_DIR
+        vault = CONCEPT_DIR
     notes, resolve = load(vault)
     parents, promote, report = analyse(notes, resolve)
 

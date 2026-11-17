@@ -12,13 +12,13 @@ from vault_clean import publishable_sections, placeholder_count, review, skos_te
 
 # --- CONFIGURATION (all values come from config.toml via vc_config.py) ---
 from vc_config import (
-    VERSION, DOMAIN, VAULT_DIR, SITE_DIR, OUTPUT_DIR, TEMPLATE_DIR,
+    VERSION, DOMAIN, VAULT_DIR, CONCEPT_DIR, EMBED_SEARCH, SITE_DIR, OUTPUT_DIR, TEMPLATE_DIR,
     SCHEME_IRI, SCHEME_PAGE_URL, SCHEME_LABEL, JSONLD_CONTEXT, concept_iri, page_url, check_paths,
 )
 DEFAULT_DESCRIPTION = "vernacular cloud taxonomy with json-ld"
 
 
-SOURCE_DIR = VAULT_DIR
+SOURCE_DIR = CONCEPT_DIR
 
 # Mapping Markdown Headers to SKOS properties
 HEADER_TO_SKOS = {
@@ -39,8 +39,8 @@ HEADER_TO_SKOS = {
 concept_index = {}
 
 def get_files():
-    """Markdown files in the vault ROOT only. Subfolders (the book, research
-    notes, templates) are deliberately ignored: glob("*.md") does not recurse."""
+    """Markdown files at the top level of the concept folder only. Subfolders
+    are deliberately ignored: glob("*.md") does not recurse."""
     return sorted(Path(SOURCE_DIR).glob("*.md"))
 
 def clean_link_text(text):
@@ -71,12 +71,17 @@ credit_warnings = []   # a quote followed by a short paragraph: a credit outside
 QUOTE_SOURCES = {"Victor Badinage Quotes by Theme": "Victor Badinage"}
 
 def find_vault_note(name):
-    """Path of the note called <name>.md anywhere in the vault (shallowest first), or None."""
+    """Path of the note called <name>.md, or None. Searched in EMBED_SEARCH order
+    (concept folder, products folder, whole vault); shallowest first within each."""
     key = name.strip()
     if key not in _note_paths:
-        hits = [p for p in Path(VAULT_DIR).rglob(f"{key}.md") if ".obsidian" not in p.parts and ".trash" not in p.parts]
-        hits.sort(key=lambda p: (len(p.parts), str(p)))
-        _note_paths[key] = hits[0] if hits else None
+        _note_paths[key] = None
+        for folder in EMBED_SEARCH:
+            hits = [p for p in Path(folder).rglob(f"{key}.md") if ".obsidian" not in p.parts and ".trash" not in p.parts]
+            if hits:
+                hits.sort(key=lambda p: (len(p.parts), str(p)))
+                _note_paths[key] = hits[0]
+                break
     return _note_paths[key]
 
 def resolve_embed(note, ref):
@@ -624,7 +629,7 @@ def hierarchy_ok():
     generated copy. Stop the build if the vault is out of sync or has loops,
     so skos:broader and skos:narrower are always consistent when published."""
     import sync_hierarchy
-    notes, resolve = sync_hierarchy.load(VAULT_DIR)
+    notes, resolve = sync_hierarchy.load(CONCEPT_DIR)
     _, _, report = sync_hierarchy.analyse(notes, resolve)
     blocking = {k: v for k, v in report.items()
                 if v and (k.startswith("Loops") or k.startswith("# Broader out of sync"))}

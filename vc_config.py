@@ -25,6 +25,11 @@ if not re.fullmatch(r"\d+\.\d+\.\d+", VERSION):
 
 DOMAIN = _cfg["domain"].rstrip("/")
 VAULT_DIR = _path(_cfg["vault_dir"])
+# Concept notes are the top-level .md files of CONCEPT_DIR (the vault itself if not set).
+CONCEPT_DIR = _path(_cfg.get("concept_dir", _cfg["vault_dir"]))
+# Embedded notes are looked for here first, then anywhere in the vault:
+# the products folder (42 Products) holds the nomenclature and the book.
+EMBED_SEARCH = [CONCEPT_DIR, CONCEPT_DIR.parent.parent, VAULT_DIR]
 SITE_DIR = _path(_cfg["site_dir"])
 OUTPUT_DIR = SITE_DIR / VERSION
 TEMPLATE_DIR = BASE_DIR / "templates"
@@ -82,6 +87,8 @@ def check_paths():
     problems = []
     if not VAULT_DIR.is_dir():
         problems.append(f"vault_dir not found: {VAULT_DIR}")
+    if not CONCEPT_DIR.is_dir():
+        problems.append(f"concept_dir not found: {CONCEPT_DIR}")
     if not SITE_DIR.is_dir():
         problems.append(f"site_dir not found: {SITE_DIR}")
     return problems

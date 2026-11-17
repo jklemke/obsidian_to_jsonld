@@ -26,7 +26,7 @@ import webbrowser
 
 import frontmatter
 
-from vc_config import BASE_DIR, SITE_DIR, VAULT_DIR, OUTPUT_DIR, VERSION, PORT, check_paths
+from vc_config import BASE_DIR, SITE_DIR, CONCEPT_DIR, OUTPUT_DIR, VERSION, PORT, check_paths
 
 # In quiet mode only lines starting with one of these markers are shown.
 SHOW = ("❌", "⚠️", "📝", "✅", "🌳", "Build Complete", "   ")
@@ -63,15 +63,15 @@ def run_step(label, script, args, verbose):
 
 
 def concept_key(name):
-    """concept-key of the vault note called <name> (case-insensitive, .md optional)."""
+    """concept-key of the concept note called <name> (case-insensitive, .md optional)."""
     want = name.removesuffix(".md").casefold()
-    for f in VAULT_DIR.glob("*.md"):
+    for f in CONCEPT_DIR.glob("*.md"):
         if f.stem.casefold() == want:
             key = frontmatter.load(f).get("concept-key")
             if not key:
                 sys.exit(f"❌ '{f.stem}' has no concept-key, so it has no page.")
             return str(key).strip()
-    sys.exit(f"❌ No note called '{name}' at the top level of the vault.")
+    sys.exit(f"❌ No note called '{name}' in the concept folder.")
 
 
 def server_running():
