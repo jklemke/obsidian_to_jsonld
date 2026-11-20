@@ -1,10 +1,18 @@
-# Vernacular Cloud build settings.
+# Badinagean Nomenclature build settings (graszp.info since 0.1.0, D-004).
 # This is the only file you should need to edit between builds.
 
 # Release being built. Each release goes to its own folder:  <site_dir>/<version>/
-version = "0.0.8"
+version = "0.1.0"
 
-domain = "https://vernacular.cloud"
+domain = "https://graszp.info"
+
+# Name shown in page headers and titles (D-004)
+site_name = "graszp.info"
+
+# The nomenclature was published at previous_domain up to and including previous_last_version.
+# Permanent IRI pages for concepts from those versions get owl:sameAs <previous_domain>/<key>/.
+previous_domain = "https://vernacular.cloud"
+previous_last_version = "0.0.8"
 
 # Concept used as skos:broader for every concept listed in the nomenclature index
 # (prefLabel "Badinagean Nomenclature")
@@ -19,7 +27,7 @@ scheme_label = "Badinagean Nomenclature"
 # concept_dir: the folder whose top-level notes are the concepts (since 0.0.8).
 vault_dir   = 'C:\Users\joekl\Dropbox\Knowledge Mgt\Personal Knowledge Mgt\00 to 09 Metadata\09 Archive\Obsidian Markdown\The Big Picture'
 concept_dir = 'C:\Users\joekl\Dropbox\Knowledge Mgt\Personal Knowledge Mgt\00 to 09 Metadata\09 Archive\Obsidian Markdown\The Big Picture\40 to 49 Career and Ambition\42 Products\42.01 Badinagean Nomenclature\concept notes'
-site_dir  = '../vernacular-cloud-003'
+site_dir  = '../graszp.info'
 
 # Local review server (serve_localhost.py)
 port = 8899

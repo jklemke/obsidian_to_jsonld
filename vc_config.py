@@ -1,4 +1,4 @@
-"""Shared settings for the Vernacular Cloud build scripts.
+"""Shared settings for the nomenclature build scripts (graszp.info since 0.1.0).
 
 Every script imports its paths, version and URLs from here, and this module
 reads them from config.toml. Change config.toml, not the scripts.
@@ -24,6 +24,10 @@ if not re.fullmatch(r"\d+\.\d+\.\d+", VERSION):
     raise ValueError(f"config.toml: version must look like 1.2.3, got {VERSION!r}")
 
 DOMAIN = _cfg["domain"].rstrip("/")
+SITE_NAME = _cfg.get("site_name", "Vernacular Cloud")
+# D-004: where the nomenclature lived before, and its last version there (owl:sameAs).
+PREVIOUS_DOMAIN = _cfg.get("previous_domain", "").rstrip("/")
+PREVIOUS_LAST_VERSION = str(_cfg.get("previous_last_version", "")).strip()
 VAULT_DIR = _path(_cfg["vault_dir"])
 # Concept notes are the top-level .md files of CONCEPT_DIR (the vault itself if not set).
 CONCEPT_DIR = _path(_cfg.get("concept_dir", _cfg["vault_dir"]))
@@ -38,8 +42,8 @@ PORT = int(_cfg.get("port", 8899))
 VERSION_URL = f"{DOMAIN}/{VERSION}"
 
 # D-006: two kinds of address.
-#   IRI  = the concept itself, permanent and version-independent:  https://vernacular.cloud/<key>/
-#   page = what the concept said in one release, frozen (D-007):     https://vernacular.cloud/<version>/<key>/
+#   IRI  = the concept itself, permanent and version-independent:  <domain>/<key>/
+#   page = what the concept said in one release, frozen (D-007):     <domain>/<version>/<key>/
 # JSON-LD @id and SKOS links use IRIs; HTML navigation inside a version uses pages.
 KEY_PATTERN = r"[A-Za-z][0-9A-Za-z]{23}"   # key-map-hash: letter + base62, 24 chars
 VERSION_PATTERN = r"\d+\.\d+\.\d+"
@@ -58,6 +62,21 @@ def concept_iri(key):
 def page_url(key, version=VERSION):
     """Frozen page for a concept in one version (default: the version being built)."""
     return f"{DOMAIN}/{version}/{key}/"
+
+
+def version_key(version):
+    """Sortable form of a version string: '0.0.10' -> (0, 0, 10)."""
+    return tuple(int(x) for x in version.split("."))
+
+
+def previous_iri(key, versions):
+    """The concept's IRI on PREVIOUS_DOMAIN if any of its versions was published there, else None (D-004)."""
+    if not (PREVIOUS_DOMAIN and PREVIOUS_LAST_VERSION):
+        return None
+    last = version_key(PREVIOUS_LAST_VERSION)
+    if any(version_key(v) <= last for v in versions):
+        return f"{PREVIOUS_DOMAIN}/{key}/"
+    return None
 
 
 ROOT_CONCEPT_IRI = concept_iri(ROOT_CONCEPT_KEY)
@@ -79,6 +98,7 @@ JSONLD_CONTEXT = {
     "dct:isVersionOf": _LINK,
     "dct:hasVersion": _LINK,
     "owl:versionIRI": _LINK,
+    "owl:sameAs": _LINK,
 }
 
 
@@ -89,6 +109,8 @@ def check_paths():
         problems.append(f"vault_dir not found: {VAULT_DIR}")
     if not CONCEPT_DIR.is_dir():
         problems.append(f"concept_dir not found: {CONCEPT_DIR}")
+    if PREVIOUS_LAST_VERSION and not re.fullmatch(r"\d+\.\d+\.\d+", PREVIOUS_LAST_VERSION):
+        problems.append(f"previous_last_version must look like 1.2.3, got {PREVIOUS_LAST_VERSION!r}")
     if not SITE_DIR.is_dir():
         problems.append(f"site_dir not found: {SITE_DIR}")
     return problems

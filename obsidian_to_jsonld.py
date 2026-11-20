@@ -14,8 +14,9 @@ from vault_clean import publishable_sections, placeholder_count, review, skos_te
 from vc_config import (
     VERSION, DOMAIN, VAULT_DIR, CONCEPT_DIR, EMBED_SEARCH, SITE_DIR, OUTPUT_DIR, TEMPLATE_DIR,
     SCHEME_IRI, SCHEME_PAGE_URL, SCHEME_LABEL, JSONLD_CONTEXT, concept_iri, page_url, check_paths,
+    SITE_NAME,
 )
-DEFAULT_DESCRIPTION = "vernacular cloud taxonomy with json-ld"
+DEFAULT_DESCRIPTION = "a concept in the Badinagean nomenclature, published as SKOS in JSON-LD"
 
 
 SOURCE_DIR = CONCEPT_DIR
@@ -487,6 +488,7 @@ def generate_concept_scheme(all_concepts, output_dir, version=VERSION):
     json_ld_script = json.dumps(scheme_data, indent=2)
     template_path = Path(TEMPLATE_DIR) 
     env = Environment(loader=FileSystemLoader(str(template_path)))
+    env.globals.update(site_name=SITE_NAME, domain=DOMAIN)
     
     try:
         template = env.get_template('skos_scheme.html')
@@ -538,6 +540,8 @@ def pass_two_build_site_and_collect():
     print("--- Generating Site & Collecting Data ---")
     
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
+    env.globals.update(site_name=SITE_NAME, domain=DOMAIN)
+    
     try:
         template = env.get_template("skos_concept.html")
     except Exception as e:
@@ -645,7 +649,7 @@ def hierarchy_ok():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build the vernacular.cloud site from the Obsidian vault.")
+    parser = argparse.ArgumentParser(description="Build the nomenclature site (graszp.info) from the Obsidian vault.")
     parser.add_argument("--rebuild", action="store_true",
                         help="delete and regenerate the folder for the configured version")
     parser.add_argument("--no-check", action="store_true",

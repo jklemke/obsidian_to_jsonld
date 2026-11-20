@@ -14,7 +14,7 @@ PERMANENT = re.compile(rf"^/({KEY_PATTERN}|concept-scheme)/?$")
 class SiteHandler(http.server.SimpleHTTPRequestHandler):
     """Static file server that also imitates the live site's /latest/ alias.
 
-    On vernacular.cloud an Amplify rule redirects /latest/<*> to /<version>/<*>.
+    On graszp.info an Amplify rule redirects /latest/<*> to /<version>/<*>.
     Here we do the same, using the version currently set in config.toml.
 
     Permanent IRIs (D-006) /<key>/ and /concept-scheme/ are served from their
@@ -69,8 +69,8 @@ def serve():
         return
 
     with httpd:
-        print(f"\n--- Vernacular Cloud Dev Server ---")
-        print(f"    Home:     http://localhost:{PORT}/   (Vernacular Cloud LLC; after a full generate_skos_for_index.py)")
+        print(f"\n--- Badinagean Nomenclature Dev Server (graszp.info) ---")
+        print(f"    Home:     http://localhost:{PORT}/   (redirects to the latest version; after a full generate_skos_for_index.py)")
         print(f"    Version:  http://localhost:{PORT}/{VERSION}/   (nomenclature index)")
         print(f"    Scheme:   http://localhost:{PORT}/{VERSION}/concept-scheme/")
         print(f"    Root:     {SITE_DIR}")

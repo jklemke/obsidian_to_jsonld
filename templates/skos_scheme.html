@@ -4,11 +4,11 @@
     <meta charset="utf-8"></meta>
     <meta content="ALL" name="ROBOTS"></meta>
     <meta content="Vernacular Cloud LLC" name="Copyright"></meta>
-    <meta content="vernacular cloud taxonomy with json-ld" name="description"></meta>
+    <meta content="The Badinagean nomenclature, published as SKOS in JSON-LD" name="description"></meta>
     <meta content="width=device-width, initial-scale=1" name="viewport"></meta>
-    <title>Concept Scheme - Vernacular Cloud</title>
+    <title>Concept Scheme - {{ site_name }}</title>
     <link rel="canonical" href="{{ scheme_iri }}">
-    <meta property="og:site_name" content="Vernacular Cloud">
+    <meta property="og:site_name" content="{{ site_name }}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="The Badinagean Nomenclature: SKOS concept scheme">
     <meta property="og:description" content="The top concepts of the Badinagean nomenclature, published as SKOS in JSON-LD.">
@@ -28,7 +28,7 @@
 <body>
 
     <header>
-      <h1><a href="/">Vernacular Cloud</a></h1><nav>
+      <h1><a href="/">{{ site_name }}</a></h1><nav>
       <ul class="navlist">
         <li><a href="/">Home</a></li>
         <li><a href="/{{ version }}/">Nomenclature</a></li>
@@ -40,7 +40,7 @@
 
       <h1>The Badinagean Nomenclature: SKOS concept scheme</h1>
       <p>These are the top concepts of the skos:ConceptScheme. They constitute the metaphysical entry points into the system.</p>
-      <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format. Its permanent IRI has the form https://vernacular.cloud/UUID/ and leads to the latest version; each version is kept at https://vernacular.cloud/version/UUID/.</p>
+      <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format. Its permanent IRI has the form {{ domain }}/UUID/ and leads to the latest version; each version is kept at {{ domain }}/version/UUID/.</p>
       {% for concept in top_concepts %}
       <h2><a href="/{{ version }}/{{ concept.uuid }}/">{{ concept.name }}</a></h2>
       <p><a href="/{{ concept.uuid }}/">{{ concept.iri }}</a></p>

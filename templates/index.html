@@ -1,5 +1,5 @@
 {#
-  Hand-crafted index for vernacular.cloud. Edit the section structure here.
+  Hand-crafted index for the nomenclature (graszp.info since 0.1.0). Edit the section structure here.
   generate_skos_for_index.py renders this to <site_dir>/<version>/index.html
   and fills in the JSON-LD from the vault.
   Concept links are RELATIVE (href="<key>/"), so they resolve inside whichever
@@ -32,11 +32,11 @@
     <meta charset="utf-8">
     <meta content="ALL" name="ROBOTS">
     <meta content="Vernacular Cloud LLC" name="Copyright">
-    <meta content="vernacular cloud taxonomy with json-ld" name="description">
+    <meta content="The Badinagean nomenclature, published as SKOS in JSON-LD" name="description">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>Badinagean Nomenclature - Vernacular Cloud</title>
+    <title>Badinagean Nomenclature - {{ site_name }}</title>
     <link rel="canonical" href="{{ domain }}/nomenclature/">
-    <meta property="og:site_name" content="Vernacular Cloud">
+    <meta property="og:site_name" content="{{ site_name }}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="The Badinagean Nomenclature">
     <meta property="og:description" content="The philosophical nomenclature of Victor Badinage, published as a SKOS concept scheme in JSON-LD.">
@@ -54,7 +54,7 @@
   </head>
   <body>
     <header>
-      <h1><a href="/">Vernacular Cloud</a></h1><nav>
+      <h1><a href="/">{{ site_name }}</a></h1><nav>
       <ul class="navlist">
         <li><a href="/">Home</a></li>
         <li><a href="/{{ version }}/">Nomenclature</a></li>
@@ -64,7 +64,7 @@
     <main>
       <h1>The Badinagean Nomenclature</h1>
       <p>This is an effort to evangelize the philosophical nomenclature of Victor Badinage.</p>
-      <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format. Its permanent IRI has the form https://vernacular.cloud/{UUID}/ and leads to the latest version; each version is kept at https://vernacular.cloud/{version}/{UUID}/.</p>
+      <p>Each concept in the Badinagean nomenclature is published in SKOS, JSON-LD, HTML format. Its permanent IRI has the form {{ domain }}/{UUID}/ and leads to the latest version; each version is kept at {{ domain }}/{version}/{UUID}/.</p>
       <section>
         {{ section("w62qBcZ3ILeFl1w6CqqDJHiU", "The Unsayables") }}
       </section>
