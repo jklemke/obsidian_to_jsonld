@@ -32,8 +32,21 @@ HEADER_TO_SKOS = {
     "Change Note": "skos:changeNote",
     "History Note": "skos:historyNote",
     "Scope Note": "skos:scopeNote",
-    "Example": "skos:example"
+    "Example": "skos:example",
+    "Close Match": "skos:closeMatch"
 }
+
+# --- Close Match (2026-11-25) ---
+# A `# Close Match` section lists links to the same idea in other vocabularies,
+# one per line, e.g. - [Wikidata: time](https://www.wikidata.org/wiki/Q11471)
+# The JSON-LD gets the concept's IRI, not the page about it: a Wikidata page
+# https://www.wikidata.org/wiki/Q11471 becomes http://www.wikidata.org/entity/Q11471.
+URL_IN_LINE = re.compile(r"https?://[^\s)\]>]+")
+WIKIDATA_PAGE = re.compile(r"^https?://(?:www\.)?wikidata\.org/wiki/(Q\d+)$")
+
+def match_iri(url):
+    m = WIKIDATA_PAGE.match(url)
+    return f"http://www.wikidata.org/entity/{m.group(1)}" if m else url
 
 # --- GLOBAL INDEX ---
 # Stores { "concept title": "uuid" } for link resolution
@@ -309,6 +322,11 @@ def generate_skos_json(uuid, title, sections):
                     uris.append(concept_iri(target_uuid))
             if uris:
                 concept[skos_prop] = uris if len(uris) > 1 else uris[0]
+
+        elif header == "Close Match":
+            iris = [match_iri(u) for line in lines for u in URL_IN_LINE.findall(line)]
+            if iris:
+                concept[skos_prop] = iris if len(iris) > 1 else iris[0]
 
         elif header == "Alternative Label":
             clean_items = [t for t in (skos_text([line]) for line in lines) if t]

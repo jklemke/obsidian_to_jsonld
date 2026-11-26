@@ -38,6 +38,7 @@ PLACEHOLDERS = {
 SKOS_SECTIONS = [
     "Definition", "Broader", "Narrower", "Related", "Alternative Label",
     "Example", "History Note", "Change Note", "Editorial Note", "Scope Note",
+    "Close Match",  # skos:closeMatch, e.g. to Wikidata (2026-11-25)
 ]
 WIP_HEADING = "work in progress"
 H1 = re.compile(r"^#\s+(.+?)\s*$")

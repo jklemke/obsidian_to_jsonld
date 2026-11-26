@@ -93,6 +93,7 @@ JSONLD_CONTEXT = {
     "skos:broader": _LINK,
     "skos:narrower": _LINK,
     "skos:related": _LINK,
+    "skos:closeMatch": _LINK,
     "skos:inScheme": _LINK,
     "skos:hasTopConcept": _LINK,
     "dct:isVersionOf": _LINK,
